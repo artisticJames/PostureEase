@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+env/
+.venv*/
+venv*/
+env*/
+
+# Local tools/IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets/Env
+.env
+*.env
+
+# App uploads and generated media
+static/uploads/
+TrainingModel/uploads/
+
+# Large datasets
+TrainingModel/SittingData/
+TrainingModel/StandingData/
+
+# Models / large binaries
+*.pt
+*.pth
+*.pkl
+*.onnx
+
+# Databases
+*.db
+TrainingModel/posturease.db
+
+# Logs
+*.log
+
+# Cache
+.cache/
+

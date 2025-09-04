@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PosturEase - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+  <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+  <!-- Add TensorFlow.js and PoseNet for posture detection -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@latest"></script>
+  <style>
+    :root {
+      --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --text-black: rgba(0, 0, 0, 1);
+      --background-color: #e8fefb;
+      --text-color: rgba(0, 0, 0, 1);
+      --card-background: white;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --border-color: #f5f5f5;
+      --primary-color: #007AFF;
+      --success-color: #34c759;
+      --warning-color: #ff9500;
+      --danger-color: #ff3b30;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      font-family: var(--font-family-sf);
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .welcome-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .welcome-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .account-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .welcome-container:hover .account-circle {
+      transform: scale(1.05);
+    }
+
+    .account-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .welcome-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .welcome {
+      font-weight: 400;
+      font-size: 13px;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-color);
+      letter-spacing: -0.2px;
+    }
+
+    .center-logo-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .center-logo-container:hover .logo {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo-text {
+      margin-top: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-color);
+      letter-spacing: -0.2px;
+    }
+
+    .menu {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .menu:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .menu-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 5px;
+    }
+
+    .menu-icon span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background-color: var(--text-color);
+      border-radius: 2px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu:hover .menu-icon span {
+      background-color: var(--primary-color);
+    }
+
+    .menu-icon.active span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+
+    .menu-icon.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-icon.active span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+
+    .background-images {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .background-images img {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+
+    .camera-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 40px;
+      position: relative;
+      padding: 0 20px;
+    }
+
+    .camera-screen {
+      width: 800px;
+      max-width: 100%;
+      height: 500px;
+      background-color: var(--card-background);
+      border-radius: 42px;
+      box-shadow: 0px 20px 50px 0px var(--shadow-color), 
+                  inset 0px 0px 0px 1.5px var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .video-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform: scaleX(-1); /* Mirror only the video container */
+    }
+
+    .video-feed {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 42px;
+      transform: scaleX(-1); /* Mirror the video feed */
+    }
+
+    .status-overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 20px;
+      color: white;
+      font-weight: 500;
+      font-size: 14px;
+      z-index: 10;
+    }
+
+    .posture-status-indicator {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #666;
+    }
+
+    .status-dot.good {
+      background: #34C759;
+    }
+
+    .status-dot.warning {
+      background: #FF9500;
+    }
+
+    .status-dot.bad {
+      background: #FF3B30;
+    }
+    
+
+
+    .controls-container {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .control-button {
+      background: var(--card-background);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 15px;
+      font-family: var(--font-family-sf);
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0px 8px 20px var(--shadow-color);
+    }
+
+    .control-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0px 12px 25px var(--shadow-color);
+    }
+
+    .start-button {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .stop-button {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .canvas-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 42px;
+      pointer-events: none;
+    }
+
+    .monitoring-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+      gap: 20px;
+    }
+
+    .monitoring-button {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #00b894 100%);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(0, 212, 170, 0.3);
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .monitoring-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(0, 212, 170, 0.4);
+    }
+
+    .monitoring-button:active {
+      transform: translateY(0);
+    }
+
+    .monitoring-button.monitoring {
+      background: linear-gradient(135deg, var(--danger-color) 0%, #d63031 100%);
+      box-shadow: 0 8px 20px rgba(255, 59, 48, 0.3);
+    }
+
+    .monitoring-button.monitoring:hover {
+      box-shadow: 0 12px 25px rgba(255, 59, 48, 0.4);
+    }
+
+    .posture-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      min-width: 250px;
+      justify-content: center;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: gray;
+      transition: all 0.3s ease;
+    }
+
+    .status-indicator.good {
+      background: var(--success-color);
+      box-shadow: 0 0 10px rgba(52, 199, 89, 0.5);
+    }
+
+    .status-indicator.warning {
+      background: var(--warning-color);
+      box-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+    }
+
+    .status-indicator.bad {
+      background: var(--danger-color);
+      box-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+    }
+
+    .status-text {
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+
+    .monitoring-stats {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 16px 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-color);
+      opacity: 0.7;
+    }
+
+    /* Side Menu Styles */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 300px;
+      height: 100vh;
+      background: rgb(255, 255, 255);
+      backdrop-filter: blur(10px);
+      box-shadow: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+      padding: 20px;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateX(30px);
+    }
+
+    .side-menu.active {
+      right: 0;
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(0);
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .menu-item {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      color: var(--text-color);
+
+
+      text-decoration: none;
+      border-radius: 8px;
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+
+    .menu-item:hover {
+      background: rgba(0, 122, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .menu-item.active {
+      background: rgba(0, 122, 255, 0.15);
+      font-weight: 500;
+    }
+
+    .menu-item i {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+      color: var(--primary-color);
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .menu-close {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-color);
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .menu-close:hover {
+      transform: translateY(-50%) rotate(90deg);
+      color: var(--primary-color);
+    }
+
+    .menu-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 30px;
+      padding: 0 15px;
+      position: relative;
+    }
+
+    .menu-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .menu-header-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .logout-item {
+      color: #ff3b30 !important;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .side-menu {
+        width: 100%;
+      }
+
+      .menu-header {
+        margin-top: 20px;
+      }
+
+      .camera-screen {
+        height: 400px;
+        border-radius: 30px;
+      }
+
+      img {
+        border-radius: 30px;
+      }
+
+      .canvas-overlay {
+        border-radius: 30px;
+      }
+
+      .welcome-container {
+        padding: 6px 12px;
+      }
+
+      .account-circle {
+        width: 32px;
+        height: 32px;
+      }
+
+      .welcome {
+        font-size: 12px;
+      }
+
+      .user-name {
+        font-size: 14px;
+      }
+
+      .monitoring-stats {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .monitoring-button {
+        min-width: 180px;
+        font-size: 14px;
+      }
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+      z-index: -1;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 999;
+    }
+
+    /* Add overlay for menu background */
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    .menu-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+  </style>
+  <!-- Add Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="background-images">
+    <img src="{{ url_for('static', filename='images/image-6-2.png') }}" alt="Background 1" />
+    <img src="{{ url_for('static', filename='images/image-6-3.png') }}" alt="Background 2" />
+  </div>
+
+  <!-- Menu Overlay -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+  
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <div class="menu-header">
+      <div class="menu-logo-container">
+        <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase">
+        <span class="menu-header-text">PosturEase</span>
+      </div>
+      <button class="menu-close" onclick="toggleMenu()">×</button>
+    </div>
+    
+    <ul class="menu-items">
+      <li><a href="{{ url_for('index') }}" class="menu-item active">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a></li>
+      <li><a href="{{ url_for('profile') }}" class="menu-item">
+        <i class="fas fa-user"></i>
+        <span>View Profile</span>
+      </a></li>
+      <li><a href="{{ url_for('exercises') }}" class="menu-item">
+        <i class="fas fa-dumbbell"></i>
+        <span>Stretching & Exercises</span>
+      </a></li>
+      <li><a href="{{ url_for('posture_history') }}" class="menu-item">
+        <i class="fas fa-history"></i>
+        <span>Posture History</span>
+      </a></li>
+      <li><a href="{{ url_for('settings') }}" class="menu-item">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+      </a></li>
+      <li><a href="{{ url_for('logout') }}" class="menu-item logout-item">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </a></li>
+    </ul>
+  </div>
+
+  <div class="top-bar">
+    <div class="welcome-container">
+      <div class="account-circle">
+        <img id="dashboard-profile-picture" src="{{ url_for('static', filename='images/icon-5.svg') }}" alt="Profile">
+      </div>
+      <div class="welcome-text">
+        <span class="welcome">Welcome back</span>
+        <span class="user-name" id="dashboard-user-name">User</span>
+      </div>
+    </div>
+    
+    <div class="center-logo-container">
+      <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase" class="logo">
+      <span class="logo-text">PosturEase</span>
+    </div>
+    
+    <button class="menu" onclick="toggleMenu()">
+      <div class="menu-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </button>
+  </div>
+
+  <div class="camera-container">
+    <div class="camera-screen">
+      <img src="{{ url_for('video_feed') }}" class="video-feed" alt="Posture Detection Feed">
+      <div class="status-overlay">
+        PosturEase Active
+      </div>
+      <div class="posture-status-indicator" id="postureStatusIndicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Ready to monitor</span>
+      </div>
+      
+
+    </div>
+    <div class="controls-container">
+      <button class="control-button start-button" onclick="startMonitoring()">Start Monitoring</button>
+      <button class="control-button stop-button" onclick="stopMonitoring()">Stop Monitoring</button>
+    </div>
+  </div>
+
+  <!-- Add the overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <script>
+    // Global variables for posture monitoring
+    let isMonitoring = false;
+    let poseNet = null;
+    let canvas, ctx;
+    let monitoringStats = {
+      startTime: null,
+      goodPostureTime: 0,
+      warningsCount: 0,
+      lastGoodPostureTime: null
+    };
+
+    // Get user data from localStorage
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    
+    // Update user name and profile picture in the header
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUserProfile();
+    });
+
+    function loadUserProfile() {
+      // Get user data from localStorage first
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      
+      // Update profile section with cached data
+      if (currentUser.first_name || currentUser.last_name) {
+        const fullName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim();
+        const userNameElement = document.getElementById('dashboard-user-name');
+        if (userNameElement) {
+          userNameElement.textContent = fullName;
+        }
+        
+        if (currentUser.profile_picture) {
+          const profilePicElement = document.getElementById('dashboard-profile-picture');
+          if (profilePicElement) {
+            profilePicElement.src = currentUser.profile_picture;
+          }
+        }
+      }
+      
+      // Fetch latest user data from server
+      fetch('/get-user-data')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const user = data.user;
+            // Update localStorage with latest data
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Update profile information
+            const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+            const userNameElement = document.getElementById('dashboard-user-name');
+            if (userNameElement) {
+              userNameElement.textContent = fullName;
+            }
+            
+            // Update profile picture if available
+            if (user.profile_picture) {
+              const profilePicElement = document.getElementById('dashboard-profile-picture');
+              if (profilePicElement) {
+                profilePicElement.src = user.profile_picture;
+              }
+            }
+          } else {
+            console.error('Failed to fetch user data:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+        });
+    }
+
+    // Check authentication and initialize
+    window.onload = function() {
+      if (localStorage.getItem('isLoggedIn') !== 'true') {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Add click event listeners for debugging
+      const stopButton = document.querySelector('.stop-button');
+      if (stopButton) {
+        stopButton.addEventListener('click', function(e) {
+          console.log('Stop button clicked!');
+          console.log('Event:', e);
+        });
+      }
+
+      // Initialize camera and pose detection (camera disabled to avoid conflicts)
+      // initializeCamera(); // Disabled to avoid camera conflicts
+      // initializePoseDetection(); // Disabled since we're using simulation
+
+      // Add click event listeners for menu
+      document.getElementById('overlay').addEventListener('click', toggleMenu);
+    }
+
+    async function initializeCamera() {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: 800, 
+            height: 500,
+            facingMode: 'user'
+          } 
+        });
+        video.srcObject = stream;
+        
+        // Set up canvas
+        canvas.width = 800;
+        canvas.height = 500;
+        ctx = canvas.getContext('2d');
+        
+        console.log("Camera initialized successfully");
+      } catch (error) {
+        console.error("Camera access denied or unavailable", error);
+        alert("Camera access is required for posture monitoring. Please allow camera access and refresh the page.");
+      }
+    }
+
+    async function initializePoseDetection() {
+      try {
+        console.log("Loading PoseNet model...");
+        poseNet = await posenet.load({
+          architecture: 'MobileNetV1',
+          outputStride: 16,
+          inputResolution: { width: 640, height: 480 },
+          multiplier: 0.75
+        });
+        console.log("PoseNet model loaded successfully");
+      } catch (error) {
+        console.error("Failed to load PoseNet model:", error);
+      }
+    }
+
+    async function togglePostureMonitoring() {
+      const button = document.getElementById('monitoringButton');
+      const status = document.getElementById('postureStatus');
+      const stats = document.getElementById('monitoringStats');
+
+      if (!isMonitoring) {
+        if (!poseNet) {
+          alert("Pose detection model is still loading. Please wait a moment and try again.");
+          return;
+        }
+        
+        // Start monitoring
+        isMonitoring = true;
+        button.innerHTML = '<i class="fas fa-stop"></i> Stop Monitoring';
+        button.classList.add('monitoring');
+        status.style.display = 'flex';
+        stats.style.display = 'flex';
+        
+        // Reset stats
+        monitoringStats.startTime = Date.now();
+        monitoringStats.goodPostureTime = 0;
+        monitoringStats.warningsCount = 0;
+        monitoringStats.lastGoodPostureTime = Date.now();
+        
+        startPostureDetection();
+        updateStatsDisplay();
+        
+        console.log("Posture monitoring started");
+      } else {
+        // Stop monitoring
+        isMonitoring = false;
+        button.innerHTML = '<i class="fas fa-play"></i> Start Posture Monitoring';
+        button.classList.remove('monitoring');
+        status.style.display = 'none';
+        stats.style.display = 'none';
+        
+        // Clear canvas
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        console.log("Posture monitoring stopped");
+      }
+    }
+
+    async function startPostureDetection() {
+      const video = document.getElementById('video');
+      
+      async function detectPose() {
+        if (!isMonitoring || !poseNet || !video.videoWidth) {
+          if (isMonitoring) {
+            requestAnimationFrame(detectPose);
+          }
+          return;
+        }
+
+        try {
+          const pose = await poseNet.estimateSinglePose(video, {
+            flipHorizontal: false,
+            decodingMethod: 'single-person'
+          });
+
+          drawPose(pose);
+          analyzePosture(pose);
+          updateStatsDisplay();
+
+        } catch (error) {
+          console.error("Error in pose detection:", error);
+        }
+
+        if (isMonitoring) {
+          requestAnimationFrame(detectPose);
+        }
+      }
+
+      detectPose();
+    }
+
+    function drawPose(pose) {
+      if (!ctx) return;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw keypoints
+      pose.keypoints.forEach(keypoint => {
+        if (keypoint.score > 0.3) {
+          ctx.beginPath();
+          ctx.arc(keypoint.position.x, keypoint.position.y, 5, 0, 2 * Math.PI);
+          ctx.fillStyle = '#007AFF';
+          ctx.fill();
+        }
+      });
+
+      // Draw skeleton
+      const adjacentKeyPoints = posenet.getAdjacentKeyPoints(pose.keypoints, 0.3);
+      adjacentKeyPoints.forEach(keypoints => {
+        ctx.beginPath();
+        ctx.moveTo(keypoints[0].position.x, keypoints[0].position.y);
+        ctx.lineTo(keypoints[1].position.x, keypoints[1].position.y);
+        ctx.strokeStyle = '#007AFF';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+    }
+
+    function analyzePosture(pose) {
+      const keypoints = pose.keypoints;
+      
+      // Get key points for posture analysis
+      const nose = keypoints.find(kp => kp.part === 'nose');
+      const leftShoulder = keypoints.find(kp => kp.part === 'leftShoulder');
+      const rightShoulder = keypoints.find(kp => kp.part === 'rightShoulder');
+      const leftEar = keypoints.find(kp => kp.part === 'leftEar');
+      const rightEar = keypoints.find(kp => kp.part === 'rightEar');
+
+      if (!nose || !leftShoulder || !rightShoulder || 
+          nose.score < 0.5 || leftShoulder.score < 0.5 || rightShoulder.score < 0.5) {
+        updatePostureStatus('warning', 'Position yourself in front of the camera');
+        return;
+      }
+
+      // Calculate shoulder alignment
+      const shoulderYDiff = Math.abs(leftShoulder.position.y - rightShoulder.position.y);
+      const shoulderMidY = (leftShoulder.position.y + rightShoulder.position.y) / 2;
+      
+      // Calculate head-shoulder alignment
+      const headShoulderOffset = Math.abs(nose.position.y - shoulderMidY);
+      
+      // Determine posture quality
+      let postureQuality = 'good';
+      let message = 'Excellent posture!';
+      
+      if (shoulderYDiff > 30) {
+        postureQuality = 'warning';
+        message = 'Keep your shoulders level';
+        monitoringStats.warningsCount++;
+      } else if (headShoulderOffset > 80) {
+        postureQuality = 'bad';
+        message = 'Straighten your neck and back';
+        monitoringStats.warningsCount++;
+      } else if (headShoulderOffset > 50) {
+        postureQuality = 'warning';
+        message = 'Slightly forward head posture';
+        monitoringStats.warningsCount++;
+      }
+      
+      // Update good posture time
+      if (postureQuality === 'good') {
+        const now = Date.now();
+        if (monitoringStats.lastGoodPostureTime) {
+          monitoringStats.goodPostureTime += now - monitoringStats.lastGoodPostureTime;
+        }
+        monitoringStats.lastGoodPostureTime = now;
+      } else {
+        monitoringStats.lastGoodPostureTime = null;
+      }
+      
+      updatePostureStatus(postureQuality, message);
+    }
+
+    function updatePostureStatus(quality, message) {
+      const indicator = document.getElementById('statusIndicator');
+      const text = document.getElementById('statusText');
+      
+      indicator.className = `status-indicator ${quality}`;
+      text.textContent = message;
+    }
+
+    function updateStatsDisplay() {
+      if (!monitoringStats.startTime) return;
+      
+      const now = Date.now();
+      const sessionTime = Math.floor((now - monitoringStats.startTime) / 1000 / 60);
+      const goodPostureMinutes = Math.floor(monitoringStats.goodPostureTime / 1000 / 60);
+      
+      // Check if elements exist before updating
+      const sessionTimeEl = document.getElementById('sessionTime');
+      const goodPostureTimeEl = document.getElementById('goodPostureTime');
+      const warningsCountEl = document.getElementById('warningsCount');
+      
+      if (sessionTimeEl) sessionTimeEl.textContent = `${sessionTime}m`;
+      if (goodPostureTimeEl) goodPostureTimeEl.textContent = `${goodPostureMinutes}m`;
+      if (warningsCountEl) warningsCountEl.textContent = monitoringStats.warningsCount;
+    }
+
+    function takePhoto() {
+      console.log("Shutter clicked — photo capture simulated.");
+    }
+
+    function toggleMenu() {
+      const menuOverlay = document.getElementById('menuOverlay');
+      const sideMenu = document.getElementById('sideMenu');
+      const menuIcon = document.querySelector('.menu-icon');
+      
+      menuOverlay.classList.toggle('active');
+      sideMenu.classList.toggle('active');
+      menuIcon.classList.toggle('active');
+    }
+
+    function logout() {
+      // Show confirmation dialog
+      if (confirm('Are you sure you want to logout?')) {
+        // Clear login state
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('username');
+        // Redirect to login page
+        window.location.href = 'login.html';
+      }
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const sideMenu = document.getElementById('sideMenu');
+      const menuButton = document.querySelector('.menu');
+      if (!sideMenu.contains(e.target) && !menuButton.contains(e.target)) {
+        sideMenu.classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+      }
+    });
+
+    // Debug: Log when page loads
+    console.log('Dashboard page loaded');
+    console.log('isMonitoring variable:', typeof isMonitoring);
+    console.log('monitoringStats variable:', typeof monitoringStats);
+    
+    // Reset monitoring state to ensure clean start
+    isMonitoring = false;
+    monitoringStats = {
+      startTime: null,
+      goodPostureTime: 0,
+      lastGoodPostureTime: null,
+      warningsCount: 0
+    };
+    console.log('Monitoring state reset to clean start');
+
+    function startMonitoring() {
+      console.log('startMonitoring called, isMonitoring:', isMonitoring);
+      if (!isMonitoring) {
+        console.log('Starting monitoring...');
+        document.querySelector('.video-feed').style.display = 'block';
+        document.querySelector('.status-overlay').textContent = 'PosturEase Active';
+        isMonitoring = true;
+        
+        // Initialize monitoring stats
+        monitoringStats = {
+          startTime: Date.now(),
+          goodPostureTime: 0,
+          lastGoodPostureTime: null,
+          warningsCount: 0
+        };
+        
+        console.log('Monitoring stats initialized:', monitoringStats);
+        
+        // Simulate posture monitoring (for demo purposes)
+        simulatePostureMonitoring();
+        console.log('Posture simulation started');
+        
+        console.log('Monitoring started successfully');
+      } else {
+        console.log('Monitoring already active');
+      }
+    }
+
+    function simulatePostureMonitoring() {
+      // Simulate posture changes every 3 seconds
+      monitoringStats.simulationInterval = setInterval(() => {
+        if (isMonitoring) {
+          // Random posture quality for demo
+          const qualities = ['good', 'warning', 'bad'];
+          const randomQuality = qualities[Math.floor(Math.random() * qualities.length)];
+          
+          updateMonitoringStats({
+            posture_quality: randomQuality,
+            confidence: randomQuality === 'good' ? 0.9 : randomQuality === 'warning' ? 0.7 : 0.4,
+            timestamp: Date.now()
+          });
+        }
+      }, 3000);
+      
+      // Check for AI posture alarms every 2 seconds
+      monitoringStats.aiAlarmInterval = setInterval(() => {
+        if (isMonitoring) {
+          checkAIPostureAlarm();
+        }
+      }, 2000);
+    }
+
+    function stopMonitoring() {
+      console.log('stopMonitoring function called');
+      console.log('Current isMonitoring state:', isMonitoring);
+      
+      if (isMonitoring) {
+        console.log('Stopping monitoring...');
+        document.querySelector('.video-feed').style.display = 'none';
+        document.querySelector('.status-overlay').textContent = 'Monitoring Stopped';
+        isMonitoring = false;
+        
+        // Stop simulation
+        if (monitoringStats.simulationInterval) {
+          clearInterval(monitoringStats.simulationInterval);
+          console.log('Simulation interval cleared');
+        }
+        
+        // Stop AI alarm checking
+        if (monitoringStats.aiAlarmInterval) {
+          clearInterval(monitoringStats.aiAlarmInterval);
+          console.log('AI alarm interval cleared');
+        }
+        
+
+        
+        // Save monitoring session data
+        console.log('Calling saveMonitoringSession...');
+        saveMonitoringSession();
+        
+        console.log('Monitoring stopped successfully');
+      } else {
+        console.log('Monitoring was not active, nothing to stop');
+      }
+    }
+
+    function updateMonitoringStats(postureData) {
+      if (!monitoringStats.startTime) return;
+      
+      const now = Date.now();
+      
+      // Update good posture time
+      if (postureData.posture_quality === 'good') {
+        if (monitoringStats.lastGoodPostureTime) {
+          monitoringStats.goodPostureTime += now - monitoringStats.lastGoodPostureTime;
+        }
+        monitoringStats.lastGoodPostureTime = now;
+      } else {
+        monitoringStats.lastGoodPostureTime = null;
+        if (postureData.posture_quality === 'bad') {
+          monitoringStats.warningsCount++;
+          // Play alarm sound for bad posture
+          playPostureAlarm();
+        }
+      }
+      
+      // Update visual status indicator
+      updatePostureStatusIndicator(postureData.posture_quality);
+      
+      // Update display
+      updateStatsDisplay();
+    }
+    
+    function playPostureAlarm() {
+      try {
+        // Create audio context for beep sound
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        // Configure the beep sound
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // 800Hz beep
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); // Volume level
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        // Play the beep for 0.5 seconds
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+        
+        console.log('Posture alarm played - Bad posture detected!');
+      } catch (error) {
+        console.log('Could not play posture alarm:', error);
+        // Fallback: try to play a simple beep using HTML5 Audio
+        try {
+          const beep = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+          beep.volume = 0.3;
+          beep.play();
+        } catch (fallbackError) {
+          console.log('Fallback alarm also failed:', fallbackError);
+        }
+      }
+    }
+    
+    function checkAIPostureAlarm() {
+      // Check if AI detected bad posture and should trigger alarm
+      fetch('/check-posture-alarm')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.alarm_triggered) {
+            console.log('AI detected bad posture:', data.message);
+            // Play alarm when AI detects bad posture
+            playPostureAlarm();
+            // Update status indicator to show bad posture
+            updatePostureStatusIndicator('bad');
+          }
+        })
+        .catch(error => {
+          console.error('Error checking AI posture alarm:', error);
+        });
+    }
+
+    function updatePostureStatusIndicator(quality) {
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      
+      if (statusDot && statusText) {
+        // Remove all quality classes
+        statusDot.classList.remove('good', 'warning', 'bad');
+        
+        // Add appropriate class and text
+        statusDot.classList.add(quality);
+        
+        switch(quality) {
+          case 'good':
+            statusText.textContent = 'Good Posture';
+            break;
+          case 'warning':
+            statusText.textContent = 'Warning';
+            break;
+          case 'bad':
+            statusText.textContent = 'Poor Posture';
+            break;
+        }
+      }
+    }
+
+    function saveMonitoringSession() {
+      console.log('saveMonitoringSession called');
+      console.log('monitoringStats:', monitoringStats);
+      
+      if (!monitoringStats.startTime) {
+        console.log('No start time, returning');
+        return;
+      }
+      
+      const sessionDuration = Math.floor((Date.now() - monitoringStats.startTime) / 1000);
+      const totalTime = Math.floor(monitoringStats.goodPostureTime / 1000);
+      const confidenceScore = totalTime / sessionDuration;
+      
+      console.log('Session duration:', sessionDuration, 'seconds');
+      console.log('Good posture time:', totalTime, 'seconds');
+      console.log('Confidence score:', confidenceScore);
+      
+      // Determine posture type based on confidence score
+      let postureType = 'Poor Posture';
+      if (confidenceScore >= 0.8) {
+        postureType = 'Good Posture';
+      } else if (confidenceScore >= 0.6) {
+        postureType = 'Fair Posture';
+      }
+      
+      const sessionData = {
+        posture_type: postureType,
+        confidence_score: confidenceScore,
+        session_duration: sessionDuration,
+        corrections_count: monitoringStats.warningsCount
+      };
+      
+      console.log('Session data to send:', sessionData);
+      
+      // Send data to server
+      console.log('Sending fetch request to /save-monitoring-session');
+      fetch('/save-monitoring-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sessionData)
+      })
+      .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+      })
+      .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+          console.log('Monitoring session saved successfully');
+          // Reset monitoring stats
+          monitoringStats = {
+            startTime: null,
+            goodPostureTime: 0,
+            lastGoodPostureTime: null,
+            warningsCount: 0
+          };
+        } else {
+          console.error('Failed to save monitoring session:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error saving monitoring session:', error);
+      });
+    }
+
+
+  </script>
+
+</body>
+</html>
+ 

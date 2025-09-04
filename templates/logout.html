@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="refresh" content="0; url={{ url_for('login') }}">
+  <script>
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('currentUser');
+    window.location.href = "{{ url_for('login') }}";
+  </script>
+</head>
+<body>
+  Logging out...
+</body>
+</html> 
