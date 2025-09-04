@@ -87,3 +87,74 @@ git push
 ```
 
 
+## Configuration
+
+- Copy these settings into an `.env` file in the project root (optional but recommended). The app reads values from `config.py`; using environment variables keeps secrets out of code.
+
+Example `.env`:
+
+```
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=yourpassword
+MYSQL_DB=posturease
+
+# Email (optional, for password reset / verification)
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=true
+MAIL_USERNAME=youraddress@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_DEFAULT_SENDER=youraddress@gmail.com
+```
+
+Configure the corresponding values in your local MySQL and email provider. See `EMAIL_SETUP.md` for details on Gmail/App Passwords and alternatives.
+
+## Database
+
+- Create the database schema by running the helper scripts in order:
+
+```powershell
+python init_db.py
+python migrate_email_verification.py
+python update_db_schema.py
+```
+
+These scripts establish the `users`, `posture_records`, `user_exercises`, and related tables used by the app. The code in `db.py` uses parameterized queries via `cursor.execute()` to prevent SQL injection and ensure correct typing.
+
+## Models and datasets
+
+- Required runtime models (not stored in Git):
+  - `yolov8n.pt` in the repo root.
+  - `TrainingModel/posture_model.pkl` in the `TrainingModel` folder.
+- Optional training datasets (ignored by Git):
+  - `TrainingModel/SittingData` and `TrainingModel/StandingData`.
+- If you plan to re-train:
+
+```powershell
+cd TrainingModel
+pip install -r requirements.txt
+python train_model.py
+```
+
+## Troubleshooting
+
+- OpenCV/torch install issues: upgrade pip and ensure Python 3.10.
+
+```powershell
+python -m pip install --upgrade pip
+```
+
+- MySQL connection errors: verify `.env` values and that MySQL is running and accessible; confirm user/password and database exist.
+- Email sending issues: double-check SMTP host/port/TLS and use an App Password for Gmail.
+- Large file warnings: models/datasets are ignored by `.gitignore`. Use Git LFS if you must version them.
+
+## Contributing
+
+PRs welcome. Please open an issue first for significant changes. Make sure to update tests or add minimal repro steps in the PR description.
+
+## License
+
+Choose a license (MIT/Apache-2.0) and add a `LICENSE` file. If unspecified, the repository defaults to “All rights reserved.”
+
+
