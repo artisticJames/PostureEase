@@ -294,6 +294,17 @@
     .status-dot.bad {
       background: #FF3B30;
     }
+
+    .status-dot.unknown {
+      background: #8E8E93;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
     
 
 
@@ -426,6 +437,36 @@
       font-weight: 500;
       font-size: 14px;
       color: var(--text-color);
+    }
+
+    /* Ensure posture indicator text is visible on dark background */
+    .posture-status-indicator .status-text {
+      color: #ffffff;
+    }
+
+    /* Confidence level indicator styles */
+    .confidence-level-indicator {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .confidence-label {
+      opacity: 0.8;
+      margin-right: 6px;
+    }
+
+    .confidence-value {
+      font-weight: 600;
+      color: #34c759;
     }
 
     .monitoring-stats {
@@ -758,6 +799,11 @@
       <div class="posture-status-indicator" id="postureStatusIndicator">
         <span class="status-dot" id="statusDot"></span>
         <span class="status-text" id="statusText">Ready to monitor</span>
+        <span class="status-text" id="statusConfidence" style="opacity:0.85"></span>
+      </div>
+      <div class="confidence-level-indicator" id="confidenceLevelIndicator" style="display: none;">
+        <span class="confidence-label">Detection Sensitivity:</span>
+        <span class="confidence-value" id="confidenceValue">Loading...</span>
       </div>
       
 
@@ -765,6 +811,7 @@
     <div class="controls-container">
       <button class="control-button start-button" onclick="startMonitoring()">Start Monitoring</button>
       <button class="control-button stop-button" onclick="stopMonitoring()">Stop Monitoring</button>
+      
     </div>
   </div>
 
@@ -779,8 +826,12 @@
     let monitoringStats = {
       startTime: null,
       goodPostureTime: 0,
+      badPostureTime: 0,
       warningsCount: 0,
-      lastGoodPostureTime: null
+      lastGoodPostureTime: null,
+      lastBadPostureTime: null,
+      postureTransitions: 0, // Track bad->good transitions
+      lastPostureQuality: null
     };
 
     // Get user data from localStorage
@@ -789,7 +840,54 @@
     // Update user name and profile picture in the header
     document.addEventListener('DOMContentLoaded', function() {
       loadUserProfile();
+      loadCameraSettings();
+      loadConfidenceSettings();
     });
+
+    function loadCameraSettings() {
+      // Load camera settings from server
+      fetch('/get-camera-settings')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Store camera settings in localStorage for quick access
+            localStorage.setItem('cameraMirror', data.mirror_enabled);
+            console.log('Camera settings loaded:', data);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading camera settings:', error);
+          // Use default settings if server request fails
+          localStorage.setItem('cameraMirror', 'true');
+        });
+    }
+
+    function loadConfidenceSettings() {
+      // Load confidence settings from server
+      fetch('/get-confidence-settings')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const indicator = document.getElementById('confidenceLevelIndicator');
+            const value = document.getElementById('confidenceValue');
+            
+            if (indicator && value) {
+              const levelDescriptions = {
+                '50%': '50% - Very Sensitive',
+                '70%': '70% - Standard',
+                '80%': '80% - Less Sensitive',
+                '90%': '90% - Least Sensitive'
+              };
+              
+              value.textContent = levelDescriptions[data.current_level] || data.current_level;
+              indicator.style.display = 'block';
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error loading confidence settings:', error);
+        });
+    }
 
     function loadUserProfile() {
       // Get user data from localStorage first
@@ -929,8 +1027,12 @@
         // Reset stats
         monitoringStats.startTime = Date.now();
         monitoringStats.goodPostureTime = 0;
+        monitoringStats.badPostureTime = 0;
         monitoringStats.warningsCount = 0;
         monitoringStats.lastGoodPostureTime = Date.now();
+        monitoringStats.lastBadPostureTime = null;
+        monitoringStats.postureTransitions = 0;
+        monitoringStats.lastPostureQuality = null;
         
         startPostureDetection();
         updateStatsDisplay();
@@ -1054,15 +1156,44 @@
         monitoringStats.warningsCount++;
       }
       
-      // Update good posture time
-      if (postureQuality === 'good') {
-        const now = Date.now();
-        if (monitoringStats.lastGoodPostureTime) {
-          monitoringStats.goodPostureTime += now - monitoringStats.lastGoodPostureTime;
-        }
-        monitoringStats.lastGoodPostureTime = now;
-      } else {
+      // Update posture time tracking
+      const now = Date.now();
+      
+      // Debug posture change
+      console.log('Posture Change:', {
+        quality: postureQuality,
+        lastGood: monitoringStats.lastGoodPostureTime,
+        lastBad: monitoringStats.lastBadPostureTime,
+        currentTime: now
+      });
+      
+      // If we were previously tracking good posture, add that time
+      if (monitoringStats.lastGoodPostureTime && postureQuality !== 'good') {
+        const timeToAdd = now - monitoringStats.lastGoodPostureTime;
+        monitoringStats.goodPostureTime += timeToAdd;
+        console.log('Added to good posture:', timeToAdd, 'ms');
         monitoringStats.lastGoodPostureTime = null;
+      }
+      
+      // If we were previously tracking bad posture, add that time
+      if (monitoringStats.lastBadPostureTime && postureQuality === 'good') {
+        const timeToAdd = now - monitoringStats.lastBadPostureTime;
+        monitoringStats.badPostureTime += timeToAdd;
+        console.log('Added to bad posture:', timeToAdd, 'ms');
+        monitoringStats.lastBadPostureTime = null;
+      }
+      
+      // Start tracking current posture type
+      if (postureQuality === 'good') {
+        if (!monitoringStats.lastGoodPostureTime) {
+          monitoringStats.lastGoodPostureTime = now;
+          console.log('Started tracking good posture');
+        }
+      } else {
+        if (!monitoringStats.lastBadPostureTime) {
+          monitoringStats.lastBadPostureTime = now;
+          console.log('Started tracking bad posture');
+        }
       }
       
       updatePostureStatus(postureQuality, message);
@@ -1080,17 +1211,32 @@
       if (!monitoringStats.startTime) return;
       
       const now = Date.now();
-      const sessionTime = Math.floor((now - monitoringStats.startTime) / 1000 / 60);
-      const goodPostureMinutes = Math.floor(monitoringStats.goodPostureTime / 1000 / 60);
+      const sessionTimeSeconds = Math.floor((now - monitoringStats.startTime) / 1000);
+      const goodPostureSeconds = Math.floor(monitoringStats.goodPostureTime / 1000);
+      const badPostureSeconds = Math.floor(monitoringStats.badPostureTime / 1000);
+      
+      // Debug logging
+      console.log('Stats Update:', {
+        sessionTime: sessionTimeSeconds,
+        goodPosture: goodPostureSeconds,
+        badPosture: badPostureSeconds,
+        warnings: monitoringStats.warningsCount,
+        lastGood: monitoringStats.lastGoodPostureTime,
+        lastBad: monitoringStats.lastBadPostureTime
+      });
       
       // Check if elements exist before updating
       const sessionTimeEl = document.getElementById('sessionTime');
       const goodPostureTimeEl = document.getElementById('goodPostureTime');
       const warningsCountEl = document.getElementById('warningsCount');
       
-      if (sessionTimeEl) sessionTimeEl.textContent = `${sessionTime}m`;
-      if (goodPostureTimeEl) goodPostureTimeEl.textContent = `${goodPostureMinutes}m`;
+      if (sessionTimeEl) sessionTimeEl.textContent = `${sessionTimeSeconds}s`;
+      if (goodPostureTimeEl) goodPostureTimeEl.textContent = `${goodPostureSeconds}s`;
       if (warningsCountEl) warningsCountEl.textContent = monitoringStats.warningsCount;
+      
+      // Update any additional display elements for bad posture time
+      const badPostureTimeEl = document.getElementById('badPostureTime');
+      if (badPostureTimeEl) badPostureTimeEl.textContent = `${badPostureSeconds}s`;
     }
 
     function takePhoto() {
@@ -1138,8 +1284,11 @@
     monitoringStats = {
       startTime: null,
       goodPostureTime: 0,
+      badPostureTime: 0,
       lastGoodPostureTime: null,
-      warningsCount: 0
+      lastBadPostureTime: null,
+      warningsCount: 0,
+      actualCorrections: 0
     };
     console.log('Monitoring state reset to clean start');
 
@@ -1155,14 +1304,18 @@
         monitoringStats = {
           startTime: Date.now(),
           goodPostureTime: 0,
+          badPostureTime: 0,
           lastGoodPostureTime: null,
-          warningsCount: 0
+          lastBadPostureTime: null,
+          warningsCount: 0,
+          postureTransitions: 0,
+          lastPostureQuality: null
         };
         
         console.log('Monitoring stats initialized:', monitoringStats);
         
-        // Simulate posture monitoring (for demo purposes)
-        simulatePostureMonitoring();
+        // Begin polling backend for posture
+        startPosturePolling();
         console.log('Posture simulation started');
         
         console.log('Monitoring started successfully');
@@ -1205,11 +1358,8 @@
         document.querySelector('.status-overlay').textContent = 'Monitoring Stopped';
         isMonitoring = false;
         
-        // Stop simulation
-        if (monitoringStats.simulationInterval) {
-          clearInterval(monitoringStats.simulationInterval);
-          console.log('Simulation interval cleared');
-        }
+        // Stop polling
+        stopPosturePolling();
         
         // Stop AI alarm checking
         if (monitoringStats.aiAlarmInterval) {
@@ -1229,25 +1379,54 @@
       }
     }
 
+    
+
     function updateMonitoringStats(postureData) {
       if (!monitoringStats.startTime) return;
       
       const now = Date.now();
       
-      // Update good posture time
-      if (postureData.posture_quality === 'good') {
-        if (monitoringStats.lastGoodPostureTime) {
+      // Track posture transitions for correction counting
+      if (monitoringStats.lastPostureQuality && 
+          monitoringStats.lastPostureQuality === 'bad' && 
+          postureData.posture_quality === 'good') {
+        monitoringStats.postureTransitions++;
+      }
+      
+      // Handle posture changes - add accumulated time before switching
+      if (monitoringStats.lastPostureQuality !== postureData.posture_quality) {
+        // If we were tracking good posture and now it's bad, add the good time
+        if (monitoringStats.lastGoodPostureTime && postureData.posture_quality !== 'good') {
           monitoringStats.goodPostureTime += now - monitoringStats.lastGoodPostureTime;
+          monitoringStats.lastGoodPostureTime = null;
         }
-        monitoringStats.lastGoodPostureTime = now;
+        
+        // If we were tracking bad posture and now it's good, add the bad time
+        if (monitoringStats.lastBadPostureTime && postureData.posture_quality === 'good') {
+          monitoringStats.badPostureTime += now - monitoringStats.lastBadPostureTime;
+          monitoringStats.lastBadPostureTime = null;
+        }
+      }
+      
+      // Start tracking current posture type
+      if (postureData.posture_quality === 'good') {
+        if (!monitoringStats.lastGoodPostureTime) {
+          monitoringStats.lastGoodPostureTime = now;
+        }
       } else {
-        monitoringStats.lastGoodPostureTime = null;
+        if (!monitoringStats.lastBadPostureTime) {
+          monitoringStats.lastBadPostureTime = now;
+        }
+        
         if (postureData.posture_quality === 'bad') {
           monitoringStats.warningsCount++;
           // Play alarm sound for bad posture
           playPostureAlarm();
         }
       }
+      
+      // Update last posture quality for transition tracking
+      monitoringStats.lastPostureQuality = postureData.posture_quality;
       
       // Update visual status indicator
       updatePostureStatusIndicator(postureData.posture_quality);
@@ -1312,10 +1491,11 @@
     function updatePostureStatusIndicator(quality) {
       const statusDot = document.getElementById('statusDot');
       const statusText = document.getElementById('statusText');
+      const statusConfidence = document.getElementById('statusConfidence');
       
       if (statusDot && statusText) {
         // Remove all quality classes
-        statusDot.classList.remove('good', 'warning', 'bad');
+        statusDot.classList.remove('good', 'warning', 'bad', 'unknown');
         
         // Add appropriate class and text
         statusDot.classList.add(quality);
@@ -1330,7 +1510,55 @@
           case 'bad':
             statusText.textContent = 'Poor Posture';
             break;
+          case 'unknown':
+            statusText.textContent = 'Position yourself in front of camera';
+            break;
         }
+        if (statusConfidence) {
+          // Keep previous confidence percentage until refreshed by polling
+        }
+      }
+    }
+
+    // Poll backend for latest posture every 1s while monitoring
+    let posturePollInterval = null;
+    function startPosturePolling() {
+      if (posturePollInterval) return;
+      posturePollInterval = setInterval(async () => {
+        try {
+          const res = await fetch('/get-current-posture');
+          const data = await res.json();
+          if (data && data.success && data.posture_data) {
+            const q = data.posture_data.posture_quality;
+            const conf = data.posture_data.confidence;
+            
+            // Update visual indicator
+            updatePostureStatusIndicator(q);
+            const statusConfidence = document.getElementById('statusConfidence');
+            if (statusConfidence && typeof conf === 'number') {
+              statusConfidence.textContent = `(${(conf*100).toFixed(1)}%)`;
+            }
+            
+            // CRITICAL: Update monitoring stats for time tracking
+            updateMonitoringStats({
+              posture_quality: q,
+              confidence: conf,
+              timestamp: Date.now()
+            });
+            
+            // Update stats display
+            updateStatsDisplay();
+          }
+        } catch (e) {
+          // silent fail
+        }
+      }, 1000);
+    }
+
+    function stopPosturePolling() {
+      if (posturePollInterval) {
+        clearInterval(posturePollInterval);
+        posturePollInterval = null;
       }
     }
 
@@ -1343,13 +1571,29 @@
         return;
       }
       
-      const sessionDuration = Math.floor((Date.now() - monitoringStats.startTime) / 1000);
-      const totalTime = Math.floor(monitoringStats.goodPostureTime / 1000);
-      const confidenceScore = totalTime / sessionDuration;
+      // Finalize any remaining tracking time
+      const now = Date.now();
+      if (monitoringStats.lastGoodPostureTime) {
+        monitoringStats.goodPostureTime += now - monitoringStats.lastGoodPostureTime;
+        monitoringStats.lastGoodPostureTime = null;
+      }
+      if (monitoringStats.lastBadPostureTime) {
+        monitoringStats.badPostureTime += now - monitoringStats.lastBadPostureTime;
+        monitoringStats.lastBadPostureTime = null;
+      }
       
+      const sessionDuration = Math.floor((Date.now() - monitoringStats.startTime) / 1000);
+      const goodTime = Math.floor(monitoringStats.goodPostureTime / 1000);
+      const badTime = Math.floor(monitoringStats.badPostureTime / 1000);
+      const confidenceScore = sessionDuration > 0 ? goodTime / sessionDuration : 0;
+      
+      console.log('=== SESSION SAVE DEBUG ===');
       console.log('Session duration:', sessionDuration, 'seconds');
-      console.log('Good posture time:', totalTime, 'seconds');
+      console.log('Good posture time:', goodTime, 'seconds');
+      console.log('Bad posture time:', badTime, 'seconds');
+      console.log('Total tracked time:', goodTime + badTime, 'seconds');
       console.log('Confidence score:', confidenceScore);
+      console.log('Raw monitoringStats:', monitoringStats);
       
       // Determine posture type based on confidence score
       let postureType = 'Poor Posture';
@@ -1359,11 +1603,17 @@
         postureType = 'Fair Posture';
       }
       
+      // Calculate actual corrections based on posture transitions
+      // A correction is when user transitions from bad to good posture
+      const actualCorrections = monitoringStats.postureTransitions;
+      
       const sessionData = {
         posture_type: postureType,
         confidence_score: confidenceScore,
         session_duration: sessionDuration,
-        corrections_count: monitoringStats.warningsCount
+        corrections_count: actualCorrections,
+        good_time: goodTime,
+        bad_time: badTime
       };
       
       console.log('Session data to send:', sessionData);
@@ -1389,8 +1639,12 @@
           monitoringStats = {
             startTime: null,
             goodPostureTime: 0,
+            badPostureTime: 0,
             lastGoodPostureTime: null,
-            warningsCount: 0
+            lastBadPostureTime: null,
+            warningsCount: 0,
+            postureTransitions: 0,
+            lastPostureQuality: null
           };
         } else {
           console.error('Failed to save monitoring session:', data.message);

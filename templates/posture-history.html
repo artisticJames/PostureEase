@@ -204,7 +204,7 @@
 
     .stats-summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 15px;
       margin-bottom: 20px;
     }
@@ -279,11 +279,36 @@
     }
 
     .posture-details {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
       font-size: 14px;
       color: var(--secondary-text);
       margin-top: 5px;
+    }
+    
+    .posture-details span {
+      padding: 4px 8px;
+      background: rgba(0, 122, 255, 0.1);
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+    }
+    
+    .posture-details .good-time {
+      background: rgba(52, 199, 89, 0.15);
+      color: #34C759;
+      font-weight: 500;
+      display: inline-block;
+      min-width: 60px;
+    }
+    
+    .posture-details .bad-time {
+      background: rgba(255, 59, 48, 0.15);
+      color: #FF3B30;
+      font-weight: 500;
+      display: inline-block;
+      min-width: 60px;
     }
 
     .chart-container {
@@ -547,6 +572,84 @@
     .logout-item {
       color: #ff3b30 !important;
     }
+
+    /* Simple Delete Button Styles */
+    .notification-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: var(--card-background);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+      transition: transform 0.2s;
+      margin-bottom: 15px;
+    }
+
+    .notification-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .card-content {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .card-actions {
+      flex-shrink: 0;
+    }
+
+    .delete-btn {
+      background: #ff3b30;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .delete-btn:hover {
+      background: #d70015;
+      transform: translateY(-1px);
+    }
+
+    .delete-btn i {
+      font-size: 12px;
+    }
+
+    /* Clear All Button Styles */
+    .clear-all-btn {
+      background: #ff3b30;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      width: 100%;
+      justify-content: center;
+      height: 36px; 
+      margin-top: 24px; 
+    }
+
+    .clear-all-btn:hover {
+      background: #d70015;
+      transform: translateY(-1px);
+    }
+
+    .clear-all-btn i {
+      font-size: 12px;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -588,8 +691,8 @@
         <div class="stat-label">Good Posture</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ stats.total_hours }}</div>
-        <div class="stat-label">Hours Monitored</div>
+        <div class="stat-value">{{ (stats.total_hours * 60) | round(1) }}</div>
+        <div class="stat-label">Minutes Monitored</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">{{ stats.total_records }}</div>
@@ -629,33 +732,60 @@
           <option value="duration">Duration</option>
         </select>
       </div>
+      <div class="filter-group">
+        <button class="clear-all-btn" onclick="clearAllHistory()">
+          <i class="fas fa-trash-alt"></i>
+          Clear All History
+        </button>
+      </div>
     </div>
+
     
     <div class="notification-list">
       {% if history %}
         {% for record in history %}
-        <div class="notification-card" onclick="showNotificationDetails('{{ loop.index }}')">
-          <div class="notification-header">
-            <span>Date & Time: {{ record.recorded_at.strftime('%I:%M %p') if record.recorded_at else 'N/A' }}</span>
-            <span>{{ record.recorded_at.strftime('%A / %B %d, %Y') if record.recorded_at else 'N/A' }}</span>
+        <div class="notification-card" data-record-id="{{ record.id }}" data-posture-type="{{ record.posture_type }}" data-duration-minutes="{{ (record.session_duration / 60) | round(1) if record.session_duration else 30 }}" data-confidence="{{ (record.confidence_score * 100) | round(1) if record.confidence_score else 50 }}" data-good-time="{{ record.good_time if record.good_time is not none else 0 }}" data-bad-time="{{ record.bad_time if record.bad_time is not none else 0 }}" data-recommended-exercises="[]">
+          <div class="card-content" onclick="showNotificationDetails(this.closest('.notification-card'))">
+            <div class="notification-header">
+              <span>Date & Time: {{ record.recorded_at.strftime('%I:%M %p') if record.recorded_at else 'N/A' }}</span>
+              <span>{{ record.recorded_at.strftime('%A / %B %d, %Y') if record.recorded_at else 'N/A' }}</span>
+            </div>
+            <div class="notification-content">
+              <div class="posture-status">
+                {% if 'Good' in record.posture_type %}
+                  <i class="fas fa-check-circle status-icon good-posture">✓</i>
+                  <span class="status-text good-posture">{{ record.posture_type }}</span>
+                {% else %}
+                  <i class="fas fa-exclamation-circle status-icon bad-posture">⚠</i>
+                  <span class="status-text bad-posture">{{ record.posture_type }}</span>
+                {% endif %}
+              </div>
+              <div class="posture-details">
+                {% set duration = record.session_duration if record.session_duration is not none else 1800 %}
+                {% set confidence = record.confidence_score if record.confidence_score is not none else 0 %}
+                {% set good_time_db = record.good_time if record.good_time is not none else 0 %}
+                {% set bad_time_db = record.bad_time if record.bad_time is not none else 0 %}
+                {% if good_time_db > 0 or bad_time_db > 0 %}
+                  {% set good_time = good_time_db %}
+                  {% set bad_time = bad_time_db %}
+                {% else %}
+                  {% set good_time = (duration * confidence) | round(0) %}
+                  {% set bad_time = duration - good_time %}
+                {% endif %}
+                <span>Duration: {{ duration }}s</span>
+                <span class="good-time">Good: {{ good_time }}s</span>
+                <span class="bad-time">Bad: {{ bad_time }}s</span>
+                <span>Corrections: {{ record.corrections_count if record.corrections_count else 0 }}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ (record.confidence_score * 100) | round(1) if record.confidence_score is not none else 0 }}%"></div>
+              </div>
+            </div>
           </div>
-          <div class="notification-content">
-            <div class="posture-status">
-              {% if 'Good' in record.posture_type %}
-                <i class="fas fa-check-circle status-icon good-posture">✓</i>
-                <span class="status-text good-posture">{{ record.posture_type }}</span>
-              {% else %}
-                <i class="fas fa-exclamation-circle status-icon bad-posture">⚠</i>
-                <span class="status-text bad-posture">{{ record.posture_type }}</span>
-              {% endif %}
-            </div>
-            <div class="posture-details">
-              <span>Duration: {{ (record.session_duration / 60) | round(1) if record.session_duration else 30 }} minutes</span>
-              <span>Corrections: {{ record.corrections_count if record.corrections_count else 0 }}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: {{ (record.confidence_score * 100) | round(1) if record.confidence_score else 50 }}%;"></div>
-            </div>
+          <div class="card-actions">
+            <button class="delete-btn" onclick="deleteRecord({{ record.id }})" title="Delete this record">
+              <i class="fas fa-trash"></i>
+            </button>
           </div>
         </div>
         {% endfor %}
@@ -719,17 +849,166 @@
   <div class="overlay" id="overlay"></div>
 
   <script>
-    // Notification details data from server
+    // Notification details data from server (optional)
     const notificationData = {{ history_data | tojson | safe }};
+    const exercisesUrl = "{{ url_for('exercises') }}";
+    
+    // Function to open specific exercise on exercises page
+    function openSpecificExercise(exerciseId, exerciseName) {
+      // Close the current modal first
+      closeNotificationDetails();
+      
+      // Navigate to exercises page
+      window.location.href = exercisesUrl;
+      
+      // Store the exercise to open in localStorage for the exercises page to use
+      localStorage.setItem('openExercise', JSON.stringify({
+        id: exerciseId,
+        name: exerciseName,
+        timestamp: Date.now()
+      }));
+    }
 
-    function showNotificationDetails(id) {
+    function showNotificationDetails(cardEl) {
       const modal = document.getElementById('notificationModal');
       const titleElement = document.getElementById('modalTitle');
       const descriptionElement = document.getElementById('modalDescription');
-      const notification = notificationData[id];
+      // Prefer on-the-fly analytics from the clicked card's data attributes
+      const postureType = (cardEl?.dataset?.postureType || '').toLowerCase();
+      const durationMinutes = parseFloat(cardEl?.dataset?.durationMinutes || '0');
+      const confidencePct = parseFloat(cardEl?.dataset?.confidence || '0');
 
-      titleElement.textContent = notification.title;
-      descriptionElement.textContent = notification.description;
+      let title = 'Posture Analysis';
+      let descriptionHtml = '';
+
+      const isGoodPosture = postureType.includes('good');
+      const durationSeconds = durationMinutes * 60; // Convert to seconds
+      
+      // Get actual good/bad time from data attributes if available
+      const goodTimeAttr = cardEl?.dataset?.goodTime;
+      const badTimeAttr = cardEl?.dataset?.badTime;
+      
+      let goodTimeSeconds, badTimeSeconds;
+      if (goodTimeAttr && badTimeAttr) {
+        // Use actual tracked times from database
+        goodTimeSeconds = parseFloat(goodTimeAttr) || 0;
+        badTimeSeconds = parseFloat(badTimeAttr) || 0;
+      } else {
+        // Fallback to calculated times
+        goodTimeSeconds = isNaN(durationSeconds) ? 0 : (durationSeconds * confidencePct / 100);
+        badTimeSeconds = isNaN(durationSeconds) ? 0 : (durationSeconds * (1 - confidencePct / 100));
+      }
+      
+      if (!isGoodPosture) {
+        // Risk messaging based on duration thresholds
+        if (durationMinutes <= 15) {
+          descriptionHtml = 'No major risk.';
+        } else if (durationMinutes <= 30) {
+          descriptionHtml = 'Mild strain possible.';
+        } else {
+          descriptionHtml = 'Increased risk of discomfort (neck/back strain).';
+        }
+        descriptionHtml += ` You maintained poor posture for <strong>${badTimeSeconds.toFixed(0)} seconds</strong> out of ${durationSeconds.toFixed(0)} total seconds. Prolonging this may lead to neck and upper back strain if continued.`;
+        if (!isNaN(confidencePct) && confidencePct > 0) {
+          descriptionHtml += ` <br><br><strong>Good posture time:</strong> ${goodTimeSeconds.toFixed(0)} seconds (${confidencePct.toFixed(1)}%)`;
+        }
+        // Add fallback recommendation
+        descriptionHtml += ` <br><br>Recommendation: <a href="${exercisesUrl}">Stretching & Exercises</a>.`;
+        
+        // Add personalized exercise recommendations after modal is shown
+        const recordId = cardEl?.dataset?.recordId;
+        if (recordId) {
+          // Fetch personalized recommendations from server
+          fetch(`/get-exercise-recommendations/${recordId}`)
+            .then(response => response.json())
+            .then(data => {
+              console.log('API Response:', data);
+              if (data.success && data.recommendations && data.recommendations.length > 0) {
+                // Create clickable exercise links that open specific exercises
+                const recommendationsHtml = data.recommendations.map(exercise => {
+                  // Map exercise names to their IDs in the exercises page
+                  const exerciseIdMap = {
+                    'Chest Opener': '5',
+                    'Cat-Cow': '3', 
+                    'Standing Cat-Cow': '4',
+                    'High Plank': '6',
+                    'Glute Bridge': '11',
+                    'Isometric Pull Ups': '12',
+                    'Forward fold': '2',
+                    'Child\'s pose': '1',
+                    'Downward-Facing Dog': '8',
+                    'Side Plank': '7',
+                    'Pigeon Pose': '9',
+                    'Quadruped Thoracic Rotation': '10'
+                  };
+                  
+                  const exerciseId = exerciseIdMap[exercise] || '1'; // Default to Child's pose if not found
+                  return `• <a href="${exercisesUrl}" onclick="openSpecificExercise('${exerciseId}', '${exercise}'); return false;" style="color: #007AFF; text-decoration: underline; cursor: pointer;">${exercise}</a>`;
+                }).join('<br>');
+                
+                const modalDescription = document.getElementById('modalDescription');
+                if (modalDescription) {
+                  // Replace the generic recommendation with personalized ones
+                  const currentContent = modalDescription.innerHTML;
+                  console.log('Current modal content:', currentContent);
+                  
+                  // Create the new content with clickable exercise recommendations
+                  const newRecommendationsContent = `<strong>Recommended Exercises:</strong><br>${recommendationsHtml}`;
+                  
+                  // Try multiple replacement patterns
+                  let newContent = currentContent.replace(
+                    /Recommendation: <a[^>]*>Stretching &amp; Exercises<\/a>\./g,
+                    newRecommendationsContent
+                  );
+                  
+                  // If that didn't work, try with regular ampersand
+                  if (newContent === currentContent) {
+                    newContent = currentContent.replace(
+                      /Recommendation: <a[^>]*>Stretching & Exercises<\/a>\./g,
+                      newRecommendationsContent
+                    );
+                  }
+                  
+                  // If that didn't work, try a simpler pattern
+                  if (newContent === currentContent) {
+                    newContent = currentContent.replace(
+                      /Recommendation:.*?Stretching.*?Exercises.*?\./g,
+                      newRecommendationsContent
+                    );
+                  }
+                  
+                  // If still no match, just replace the entire recommendation line
+                  if (newContent === currentContent) {
+                    newContent = currentContent.replace(
+                      /<br><br>Recommendation: <a[^>]*>Stretching &amp; Exercises<\/a>\./,
+                      `<br><br>${newRecommendationsContent}`
+                    );
+                  }
+                  
+                  modalDescription.innerHTML = newContent;
+                  console.log('Updated modal with recommendations:', recommendationsHtml);
+                  console.log('New modal content:', newContent);
+                }
+              }
+            })
+            .catch(error => {
+              console.log('Error fetching recommendations:', error);
+            });
+        }
+      } else {
+        descriptionHtml = `Great job maintaining good posture! You had <strong>good posture for ${goodTimeSeconds.toFixed(0)} seconds</strong> out of ${durationSeconds.toFixed(0)} total seconds.`;
+        if (!isNaN(confidencePct) && confidencePct > 0) {
+          descriptionHtml += ` <br><br><strong>Confidence:</strong> ${confidencePct.toFixed(1)}%`;
+        }
+        if (badTimeSeconds > 0) {
+          descriptionHtml += ` <br><br><strong>Poor posture time:</strong> ${badTimeSeconds.toFixed(0)} seconds.`;
+        }
+      }
+
+      // Fallback to server-provided content if available and richer
+      // Note: legacy calls passed an index; we cannot infer it reliably here, so we rely on analytics.
+      titleElement.textContent = title;
+      descriptionElement.innerHTML = descriptionHtml;
       modal.classList.add('active');
     }
 
@@ -778,7 +1057,7 @@
     // Check authentication and load user data
     window.onload = function() {
       if (localStorage.getItem('isLoggedIn') !== 'true') {
-        window.location.href = 'login.html';
+        window.location.href = "{{ url_for('login') }}";
       }
       
       // Load user data and update profile section
@@ -879,6 +1158,70 @@
             card.style.display = 'block';
         }
       });
+    }
+
+    // Simple delete functionality
+    function deleteRecord(recordId) {
+      if (confirm('Are you sure you want to delete this posture record? This action cannot be undone.')) {
+        fetch('/delete-posture-record', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ record_id: recordId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Remove the card from the DOM
+            const card = document.querySelector(`[data-record-id="${recordId}"]`);
+            if (card) {
+              card.remove();
+            }
+            // Show success message
+            alert('Record deleted successfully!');
+            // Reload the page to update statistics
+            location.reload();
+          } else {
+            alert('Error deleting record: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error deleting record. Please try again.');
+        });
+      }
+    }
+
+    // Clear all history functionality
+    function clearAllHistory() {
+      const confirmMessage = 'Are you sure you want to delete ALL posture history records? This action cannot be undone and will permanently remove all your posture data.';
+      
+      if (confirm(confirmMessage)) {
+        // Double confirmation for safety
+        if (confirm('This will delete ALL your posture history. Are you absolutely sure?')) {
+          fetch('/clear-posture-history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert(`Successfully deleted ${data.deleted} posture records!`);
+              // Reload the page to show empty state
+              location.reload();
+            } else {
+              alert('Error clearing history: ' + data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error clearing history. Please try again.');
+          });
+        }
+      }
     }
   </script>
 </body>

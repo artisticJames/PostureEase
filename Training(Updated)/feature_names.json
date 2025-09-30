@@ -1,0 +1,16 @@
+{
+  "feature_names": [
+    "angle_neck",
+    "angle_upper_back",
+    "angle_head_tilt",
+    "angle_shoulder_alignment",
+    "angle_front",
+    "ratio_ear_nose_asym",
+    "ratio_shoulder_span",
+    "ratio_ear_shoulder_r",
+    "ratio_ear_shoulder_l",
+    "ratio_shoulder_hip_r",
+    "ratio_shoulder_hip_l",
+    "ratio_nose_shoulder_mid"
+  ]
+}

@@ -688,6 +688,26 @@
 
       // Add click event listener for overlay
       document.getElementById('overlay').addEventListener('click', toggleMenu);
+      
+      // Check if we need to auto-open a specific exercise
+      const openExerciseData = localStorage.getItem('openExercise');
+      if (openExerciseData) {
+        try {
+          const exerciseData = JSON.parse(openExerciseData);
+          // Check if the data is recent (within 5 seconds)
+          if (Date.now() - exerciseData.timestamp < 5000) {
+            // Auto-open the specific exercise
+            setTimeout(() => {
+              showExerciseDetails(exerciseData.id, exerciseData.name);
+            }, 500); // Small delay to ensure page is fully loaded
+          }
+          // Clear the stored data
+          localStorage.removeItem('openExercise');
+        } catch (e) {
+          console.log('Error parsing exercise data:', e);
+          localStorage.removeItem('openExercise');
+        }
+      }
     }
 
     // Close menu when clicking outside

@@ -614,6 +614,26 @@
         </div>
       </a>
 
+      <a href="#" class="settings-item" onclick="openModal('cameraModal')">
+        <div class="settings-icon">
+          <i class="fas fa-video"></i>
+        </div>
+        <div class="settings-text">Camera Settings</div>
+        <div class="settings-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="settings-item" onclick="openModal('confidenceModal')">
+        <div class="settings-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="settings-text">Posture Detection Sensitivity</div>
+        <div class="settings-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
       <a href="#" class="settings-item" onclick="openModal('themeModal')">
         <div class="settings-icon">
           <i class="fas fa-universal-access"></i>
@@ -779,6 +799,63 @@
           </label>
         </div>
         <button class="save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera Settings Modal -->
+  <div class="modal" id="cameraModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Camera Settings</div>
+        <button class="modal-close" onclick="closeModal('cameraModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Mirror Camera</div>
+          <div class="setting-option-description">Enable mirroring to show yourself as you would appear in a mirror (recommended for posture monitoring)</div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cameraMirrorToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-option">
+          <div class="setting-option-title">Camera Preview</div>
+          <div class="setting-option-description">Test your camera settings in real-time</div>
+          <button class="text-size-btn" onclick="testCameraSettings()">Test Camera</button>
+        </div>
+        <button class="save-btn" onclick="saveCameraSettings()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confidence Level Settings Modal -->
+  <div class="modal" id="confidenceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Posture Detection Sensitivity</div>
+        <button class="modal-close" onclick="closeModal('confidenceModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Detection Sensitivity</div>
+          <div class="setting-option-description">Choose how sensitive the posture detection should be. Lower values are more sensitive and will detect posture issues more easily.</div>
+          <div style="margin-top: 15px;">
+            <select id="confidenceLevelSelect" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; background: white; font-size: 16px;">
+              <option value="50%">50% - Very Sensitive (Detects minor posture issues)</option>
+              <option value="70%">70% - Standard (Balanced detection)</option>
+              <option value="80%">80% - Less Sensitive (Only major posture issues)</option>
+              <option value="90%">90% - Least Sensitive (Only severe posture issues)</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-option">
+          <div class="setting-option-title">Current Setting</div>
+          <div class="setting-option-description" id="currentConfidenceDescription">
+            Loading current confidence level...
+          </div>
+        </div>
+        <button class="save-btn" onclick="saveConfidenceSettings()">Save Changes</button>
       </div>
     </div>
   </div>
@@ -1016,7 +1093,121 @@
       
       document.getElementById('textSizeLabel').textContent = 
         savedSize.charAt(0).toUpperCase() + savedSize.slice(1);
+      
+      // Load camera settings
+      loadCameraSettings();
+      
+      // Load confidence settings
+      loadConfidenceSettings();
     });
+
+    // Camera settings functions
+    function loadCameraSettings() {
+      // Load saved camera mirror setting
+      const savedMirror = localStorage.getItem('cameraMirror');
+      const mirrorToggle = document.getElementById('cameraMirrorToggle');
+      if (mirrorToggle) {
+        mirrorToggle.checked = savedMirror !== 'false';
+      }
+    }
+
+    function saveCameraSettings() {
+      const mirrorToggle = document.getElementById('cameraMirrorToggle');
+      const mirrorEnabled = mirrorToggle ? mirrorToggle.checked : true;
+      
+      // Save to localStorage
+      localStorage.setItem('cameraMirror', mirrorEnabled);
+      
+      // Send to server
+      fetch('/update-camera-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mirror_enabled: mirrorEnabled
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Camera settings saved successfully!');
+          closeModal('cameraModal');
+        } else {
+          alert('Failed to save camera settings: ' + (data.message || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Error saving camera settings:', error);
+        alert('Error saving camera settings. Please try again.');
+      });
+    }
+
+    function testCameraSettings() {
+      // Open camera test in new window or redirect to dashboard
+      window.open('{{ url_for("index") }}', '_blank');
+    }
+
+    // Confidence level settings functions
+    function loadConfidenceSettings() {
+      fetch('/get-confidence-settings')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const select = document.getElementById('confidenceLevelSelect');
+            const description = document.getElementById('currentConfidenceDescription');
+            
+            if (select) {
+              select.value = data.current_level;
+            }
+            
+            if (description) {
+              const levelDescriptions = {
+                '50%': 'Very Sensitive - Will detect even minor posture issues and provide frequent alerts.',
+                '70%': 'Standard - Balanced detection that catches most posture problems.',
+                '80%': 'Less Sensitive - Only alerts for significant posture issues.',
+                '90%': 'Least Sensitive - Only alerts for severe posture problems.'
+              };
+              description.textContent = levelDescriptions[data.current_level] || 'Current level: ' + data.current_level;
+            }
+          } else {
+            console.error('Failed to load confidence settings:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading confidence settings:', error);
+        });
+    }
+
+    function saveConfidenceSettings() {
+      const select = document.getElementById('confidenceLevelSelect');
+      const selectedLevel = select.value;
+      
+      fetch('/update-confidence-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          confidence_level: selectedLevel
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Confidence level updated successfully!');
+          closeModal('confidenceModal');
+          // Update the description
+          loadConfidenceSettings();
+        } else {
+          alert('Failed to update confidence level: ' + (data.message || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Error updating confidence level:', error);
+        alert('Error updating confidence level. Please try again.');
+      });
+    }
   </script>
 </body>
 </html> 

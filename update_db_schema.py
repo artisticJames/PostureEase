@@ -13,16 +13,56 @@ def update_db_schema():
 
     try:
         # Add session_duration column if it doesn't exist
-        cursor.execute("""
-            ALTER TABLE posture_records 
-            ADD COLUMN IF NOT EXISTS session_duration INT DEFAULT 30
-        """)
+        try:
+            cursor.execute("""
+                ALTER TABLE posture_records 
+                ADD COLUMN session_duration INT DEFAULT 30
+            """)
+            print("Added session_duration column")
+        except mysql.connector.Error as e:
+            if "Duplicate column name" in str(e):
+                print("session_duration column already exists")
+            else:
+                raise e
         
         # Add corrections_count column if it doesn't exist
-        cursor.execute("""
-            ALTER TABLE posture_records 
-            ADD COLUMN IF NOT EXISTS corrections_count INT DEFAULT 0
-        """)
+        try:
+            cursor.execute("""
+                ALTER TABLE posture_records 
+                ADD COLUMN corrections_count INT DEFAULT 0
+            """)
+            print("Added corrections_count column")
+        except mysql.connector.Error as e:
+            if "Duplicate column name" in str(e):
+                print("corrections_count column already exists")
+            else:
+                raise e
+        
+        # Add good_time column if it doesn't exist
+        try:
+            cursor.execute("""
+                ALTER TABLE posture_records 
+                ADD COLUMN good_time INT DEFAULT 0
+            """)
+            print("Added good_time column")
+        except mysql.connector.Error as e:
+            if "Duplicate column name" in str(e):
+                print("good_time column already exists")
+            else:
+                raise e
+        
+        # Add bad_time column if it doesn't exist
+        try:
+            cursor.execute("""
+                ALTER TABLE posture_records 
+                ADD COLUMN bad_time INT DEFAULT 0
+            """)
+            print("Added bad_time column")
+        except mysql.connector.Error as e:
+            if "Duplicate column name" in str(e):
+                print("bad_time column already exists")
+            else:
+                raise e
         
         # Update foreign key constraint for user_face_embeddings to include CASCADE DELETE
         # First, drop the existing foreign key constraint

@@ -123,7 +123,7 @@ def verify_user(username, password):
         logger.error(f"Error verifying user: {e}")
         return False, str(e)
 
-def save_posture_record(user_id, posture_type, confidence_score, session_duration=None, corrections_count=None):
+def save_posture_record(user_id, posture_type, confidence_score, session_duration=None, corrections_count=None, good_time=None, bad_time=None):
     try:
         conn = get_db_connection()
         if not conn:
@@ -132,9 +132,9 @@ def save_posture_record(user_id, posture_type, confidence_score, session_duratio
         cursor = conn.cursor()
         
         cursor.execute("""
-            INSERT INTO posture_records (user_id, posture_type, confidence_score, session_duration, corrections_count)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (user_id, posture_type, confidence_score, session_duration, corrections_count))
+            INSERT INTO posture_records (user_id, posture_type, confidence_score, session_duration, corrections_count, good_time, bad_time)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (user_id, posture_type, confidence_score, session_duration, corrections_count, good_time, bad_time))
         
         conn.commit()
         record_id = cursor.lastrowid
@@ -191,6 +191,30 @@ def clear_user_posture_history(user_id):
     except Error as e:
         logger.error(f"Error clearing posture history: {e}")
         return False, str(e)
+
+def delete_posture_record(record_id, user_id):
+    """Delete a specific posture record for a given user"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return False, "Database connection failed"
+
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM posture_records WHERE id = %s AND user_id = %s", (record_id, user_id))
+        deleted_count = cursor.rowcount
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        if deleted_count > 0:
+            return True, "Record deleted successfully"
+        else:
+            return False, "Record not found or access denied"
+    except Error as e:
+        logger.error(f"Error deleting posture record: {e}")
+        return False, str(e)
+
 def get_exercises():
     try:
         conn = get_db_connection()
@@ -302,10 +326,17 @@ def delete_user(user_id):
 
         cursor = conn.cursor()
         
-        # First delete related records (including face embeddings)
+        # First delete related records (including face embeddings, guarded if table missing)
         cursor.execute("DELETE FROM posture_records WHERE user_id = %s", (user_id,))
         cursor.execute("DELETE FROM user_exercises WHERE user_id = %s", (user_id,))
-        cursor.execute("DELETE FROM user_face_embeddings WHERE user_id = %s", (user_id,))
+        try:
+            cursor.execute("DELETE FROM user_face_embeddings WHERE user_id = %s", (user_id,))
+        except Error as e:
+            # If table does not exist, ignore; otherwise re-raise
+            if getattr(e, 'errno', None) in (1146,):  # ER_NO_SUCH_TABLE
+                logger.warning("user_face_embeddings table missing; skipping delete")
+            else:
+                raise
         
         # Then delete the user
         cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))

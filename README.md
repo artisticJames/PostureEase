@@ -64,7 +64,7 @@ The app should start on `http://127.0.0.1:5000/`.
 - `app.py` — Flask app entry point
 - `templates/` and `static/` — UI templates and assets
 - `TrainingModel/` — training scripts, datasets (ignored), and model artifacts (pkl)
-- `face_recognition_module.py` — face recognition logic (see plan in `FACE_RECOGNITION_IMPLEMENTATION_PLAN.md`)
+  
 - `EMAIL_SETUP.md` — email configuration guide
 
 ## Notes
