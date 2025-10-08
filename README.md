@@ -2,6 +2,17 @@
 
 Computer-vision powered posture assistant built with Python/Flask and YOLO/Mediapipe-based posture analysis.
 
+## What’s New
+
+- Initial Git setup and repository bootstrap (2025-10-08)
+- Database migration helpers for email verification and schema updates
+- Email flows for verification and password reset (see `EMAIL_SETUP.md`)
+- Dashboard, posture history, profile, settings, and admin templates
+- YOLO/Mediapipe posture detection utilities and training assets
+- Basic test scripts for cameras, ML integration, and orientation detection
+
+See `CHANGELOG.md` for details.
+
 ## Quick start (Windows / PowerShell)
 
 1) Clone the repo
