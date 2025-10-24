@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}PosturEase Export Report{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .container { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+  .heading { font-size: 20px; margin: 0 0 16px; color: var(--text-color); }
+  .card { background: var(--card-background); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; box-shadow: 0 1px 2px var(--shadow-color); }
+  .muted { color: #6b7280; font-size: 12px; }
+  .kpi { display: flex; gap: 16px; flex-wrap: wrap; }
+  .kpi div { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; }
+  .ai-card { border-left: 4px solid var(--success-color); padding: 16px 16px 16px 18px; background: linear-gradient(180deg,#ffffff,#fafafa); }
+  .ai-card h3 { margin: 0 0 8px; font-size: 15px; color: #065f46; }
+  .ai-card .content { white-space: pre-wrap; line-height: 1.5; }
+  h2 { font-size: 16px; margin: 24px 0 8px; color: var(--text-color); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1 class="heading">PosturEase Export Report</h1>
+
+  <div class="card kpi">
+    <div><div class='muted'>Sessions</div><div><strong>{{ total_sessions }}</strong></div></div>
+    <div><div class='muted'>Good Sessions %</div><div><strong>{{ good_pct|round(1) }}%</strong></div></div>
+    <div><div class='muted'>Total Duration</div><div><strong>{{ (total_duration/60.0)|round(1) }} min</strong></div></div>
+    <div><div class='muted'>Good Time</div><div><strong>{{ (total_good_time/60.0)|round(1) }} min</strong></div></div>
+    <div><div class='muted'>Bad Time</div><div><strong>{{ (total_bad_time/60.0)|round(1) }} min</strong></div></div>
+  </div>
+
+  <h2>Overall Time Distribution</h2>
+  <div class="card">{{ stacked_bar_svg|safe }}<div class="muted" style="margin-top:8px">Green = good minutes, Red = bad minutes</div></div>
+
+  <h2>AI Ergonomic Tips</h2>
+  <div class="card ai-card">
+    <h3>Personalized Guidance</h3>
+    <div class="content">{{ safe_tips_text or 'No tips available.' }}</div>
+  </div>
+
+  {{ products_html|safe }}
+</div>
+{% endblock %}
+
+

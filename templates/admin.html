@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PosturEase - Admin Dashboard</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+  <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --text-black: rgba(0, 0, 0, 1);
+      --background-color: #e8fefb;
+      --text-color: rgba(0, 0, 0, 1);
+      --card-background: white;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --border-color: #f5f5f5;
+      --primary-color: #007AFF;
+      --success-color: #34c759;
+      --warning-color: #ff9500;
+      --danger-color: #ff3b30;
+      --secondary-text: #666;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      font-family: var(--font-family-sf);
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .background-images {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    .background-images img {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+    .center-logo-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 1;
+      transition: all 0.3s ease;
+      margin-top: 60px;
+    }
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    .center-logo-container:hover .logo {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+    .logo-text {
+      margin-top: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-color);
+      letter-spacing: -0.2px;
+    }
+    .menu {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      position: absolute;
+      right: 20px;
+      top: 20px;
+    }
+    .menu:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    .menu img {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+    }
+    .menu:hover img {
+      transform: scale(1.1);
+    }
+    .admin-container {
+      max-width: 1100px;
+      margin: 60px auto 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .admin-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .user-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: flex-end;
+    }
+    .user-actions button {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .user-actions button:hover {
+      background: #0056b3;
+    }
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .users-table th, .users-table td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 15px;
+    }
+    .users-table th {
+      background: #f7faff;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    .users-table tr:last-child td {
+      border-bottom: none;
+    }
+    .users-table td .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--primary-color);
+      font-size: 18px;
+      margin-right: 8px;
+      transition: color 0.2s;
+    }
+    .users-table td .action-btn:last-child {
+      margin-right: 0;
+    }
+    .users-table td .action-btn:hover {
+      color: #0056b3;
+    }
+    .status-toggle {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 18px;
+      color: var(--success-color);
+      transition: color 0.2s;
+    }
+    .status-toggle.inactive {
+      color: var(--danger-color);
+    }
+    .role-select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      background: #f7faff;
+      color: var(--text-color);
+    }
+    /* Responsive */
+    @media (max-width: 900px) {
+      .admin-container { padding: 0 5px; }
+      .users-table th, .users-table td { padding: 10px 6px; }
+    }
+    @media (max-width: 600px) {
+      .admin-title { font-size: 20px; }
+      .users-table th, .users-table td { font-size: 13px; }
+      .user-actions button { font-size: 13px; padding: 8px 10px; }
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 30px 24px;
+      border-radius: 16px;
+      min-width: 320px;
+      max-width: 95vw;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 22px;
+      background: none;
+      border: none;
+      color: var(--danger-color);
+      cursor: pointer;
+    }
+    .modal-content label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+    .modal-content input, .modal-content select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 15px;
+      background: #f7faff;
+      color: var(--text-color);
+    }
+    .modal-content button[type="submit"] {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .modal-content button[type="submit"]:hover {
+      background: #0056b3;
+    }
+    
+    .modal-content button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-content input:focus,
+    .modal-content select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+    
+    .modal-content label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+      color: var(--text-color);
+    }
+    
+    .modal-content small {
+      display: block;
+      margin-top: 4px;
+    }
+    
+    /* Posture History Modal Styles */
+    .modal-content h2 {
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    
+    .modal-content h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .modal-content table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .modal-content table th,
+    .modal-content table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .modal-content table th {
+      background: #f7faff;
+      font-weight: 600;
+      color: var(--primary-color);
+      position: sticky;
+      top: 0;
+    }
+    
+    .modal-content table tbody tr:hover {
+      background: rgba(0, 122, 255, 0.05);
+    }
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background-color: var(--card-background);
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease-in-out;
+      z-index: 1001;
+      padding: 20px;
+      visibility: hidden;
+      opacity: 0;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+    }
+    .side-menu.active {
+      right: 0;
+      visibility: visible;
+      opacity: 1;
+    }
+    .menu-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-color);
+      transition: color 0.3s;
+    }
+    .menu-close:hover {
+      color: var(--primary-color);
+    }
+    .menu-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 30px;
+      padding: 0 50px 0 15px; /* extra right padding to avoid overlap with close button */
+    }
+    .menu-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+    .menu-header-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+    .menu-item {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: 8px;
+      margin: 5px 0;
+    }
+    .menu-item:hover {
+      background: rgba(0, 122, 255, 0.1);
+      transform: translateX(5px);
+    }
+    .menu-item i {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+      color: var(--primary-color);
+      transition: transform 0.3s ease;
+    }
+    .menu-item:hover i {
+      transform: scale(1.1);
+    }
+    .logout-item {
+      color: #ff3b30 !important;
+    }
+    .logout-item i {
+      color: #ff3b30 !important;
+    }
+    .logout-item:hover {
+      background: rgba(255, 59, 48, 0.1);
+      color: #ff3b30 !important;
+    }
+    .logout-item:hover i {
+      color: #ff3b30 !important;
+      transform: scale(1.1);
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+      z-index: 1000;
+    }
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-images">
+    <img src="{{ url_for('static', filename='images/image-6-2.png') }}" alt="Background 1" />
+    <img src="{{ url_for('static', filename='images/image-6-3.png') }}" alt="Background 2" />
+  </div>
+  <div class="top-bar" style="position: relative;">
+    <div class="center-logo-container">
+      <img class="logo" src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo">
+      <div class="logo-text">PosturEase Admin</div>
+    </div>
+    <button class="menu" onclick="openMenu()" style="position: absolute; right: 20px; top: 20px; z-index: 10;">
+      <img src="{{ url_for('static', filename='images/icon-9.svg') }}" alt="Menu" />
+    </button>
+  </div>
+  <div class="admin-container">
+    <div class="admin-title">Manage Users</div>
+    <div class="user-actions">
+      <button onclick="openUserModal('create')"><i class="fas fa-user-plus"></i> Create User</button>
+    </div>
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Username</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="usersTbody">
+        <!-- User rows will be rendered here by JS -->
+      </tbody>
+    </table>
+  </div>
+  <!-- User Modal -->
+  <div class="modal" id="userModal">
+    <div class="modal-content" id="userModalContent">
+      <!-- Modal content will be rendered by JS -->
+    </div>
+  </div>
+  
+  <!-- Posture History Modal -->
+  <div class="modal" id="postureHistoryModal">
+    <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+      <button class="modal-close" onclick="closePostureHistoryModal()">&times;</button>
+      <div id="postureHistoryContent">
+        <!-- Posture history content will be rendered by JS -->
+      </div>
+    </div>
+  </div>
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <button class="menu-close" onclick="closeMenu()">&times;</button>
+    <div class="menu-header">
+      <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo">
+      <span class="menu-header-text">PosturEase Admin</span>
+    </div>
+    <nav class="menu-items">
+      <a href="#" class="menu-item logout-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </div>
+  <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+  <script>
+    let users = [];
+    let editingUserId = null;
+
+    // Helper functions for form options
+    function generateYearOptions() {
+      const currentYear = new Date().getFullYear();
+      let options = '';
+      for (let year = currentYear - 100; year <= currentYear - 13; year++) {
+        options += `<option value="${year}">${year}</option>`;
+      }
+      return options;
+    }
+
+    function generateDayOptions() {
+      let options = '';
+      for (let day = 1; day <= 31; day++) {
+        options += `<option value="${day}">${day}</option>`;
+      }
+      return options;
+    }
+
+    // Load users from database
+    function loadUsers() {
+      fetch('/admin/users')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            users = data.users;
+            renderUsers();
+          } else {
+            alert('Failed to load users: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while loading users');
+        });
+    }
+
+    function renderUsers() {
+      const tbody = document.getElementById('usersTbody');
+      tbody.innerHTML = users.map(user => `
+        <tr>
+          <td>
+            <span style="font-weight:600;">${user.first_name} ${user.last_name}</span>
+          </td>
+          <td>${user.email}</td>
+          <td>@${user.username}</td>
+          <td>
+            ${user.is_online ? '<span style="color: var(--success-color); font-size: 14px; font-weight: 500;"><i class="fas fa-circle"></i> Online</span>' : '<span style="color: var(--secondary-text); font-size: 14px;">Offline</span>'}
+          </td>
+          <td>
+            <button class="action-btn" title="View" onclick="openUserModal('view', ${user.id})">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="action-btn" title="Edit" onclick="openUserModal('edit', ${user.id})">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="action-btn" title="Delete" onclick="deleteUser(${user.id})">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openUserModal(mode, id) {
+      const modal = document.getElementById('userModal');
+      const content = document.getElementById('userModalContent');
+      let user = users.find(u => u.id === id) || {};
+      
+      if (mode === 'create') {
+        content.innerHTML = `
+          <button class="modal-close" onclick="closeUserModal()">&times;</button>
+          <h2 style="margin-bottom: 25px; color: var(--primary-color);">
+            <i class="fas fa-user-plus"></i> Create New User
+          </h2>
+          <form onsubmit="createUser(event)" style="max-height: 70vh; overflow-y: auto;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+              <div>
+                <label><i class="fas fa-user"></i> First Name *</label>
+                <input type="text" id="createFirstName" required placeholder="Enter first name" 
+                       style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+              </div>
+              <div>
+                <label><i class="fas fa-user"></i> Last Name *</label>
+                <input type="text" id="createLastName" required placeholder="Enter last name"
+                       style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label><i class="fas fa-envelope"></i> Email Address *</label>
+              <input type="email" id="createEmail" required placeholder="user@example.com"
+                     style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label><i class="fas fa-at"></i> Username *</label>
+              <input type="text" id="createUsername" required placeholder="username" 
+                     pattern="[a-zA-Z0-9_]+" title="Only letters, numbers, and underscores allowed"
+                     style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+              <small style="color: var(--secondary-text); font-size: 12px;">Only letters, numbers, and underscores allowed</small>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label><i class="fas fa-lock"></i> Password *</label>
+              <input type="password" id="createPassword" required placeholder="Enter password"
+                     minlength="8" 
+                     style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+              <small style="color: var(--secondary-text); font-size: 12px;">Minimum 8 characters</small>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label><i class="fas fa-calendar"></i> Date of Birth *</label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div>
+                  <select id="createBirthYear" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+                    <option value="">Year</option>
+                    ${generateYearOptions()}
+                  </select>
+                </div>
+                <div>
+                  <select id="createBirthMonth" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+                    <option value="">Month</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </select>
+                </div>
+                <div>
+                  <select id="createBirthDay" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+                    <option value="">Day</option>
+                    ${generateDayOptions()}
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+              <label><i class="fas fa-venus-mars"></i> Gender *</label>
+              <select id="createGender" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button type="button" onclick="closeUserModal()" 
+                      style="padding: 12px 20px; border: 1px solid var(--border-color); background: white; color: var(--text-color); border-radius: 8px; cursor: pointer; font-size: 14px;">
+                Cancel
+              </button>
+              <button type="submit" 
+                      style="padding: 12px 25px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                <i class="fas fa-user-plus"></i> Create User
+              </button>
+            </div>
+          </form>
+        `;
+      } else if (mode === 'edit') {
+        editingUserId = id;
+        content.innerHTML = `
+          <button class="modal-close" onclick="closeUserModal()">&times;</button>
+          <h2 style="margin-bottom: 25px; color: var(--primary-color);">
+            <i class="fas fa-edit"></i> Edit User
+          </h2>
+          <form onsubmit="editUser(event)">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+              <div>
+                <label><i class="fas fa-user"></i> First Name *</label>
+                <input type="text" id="editFirstName" value="${user.first_name}" required 
+                       style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+              </div>
+              <div>
+                <label><i class="fas fa-user"></i> Last Name *</label>
+                <input type="text" id="editLastName" value="${user.last_name}" required
+                       style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <label><i class="fas fa-envelope"></i> Email Address *</label>
+              <input type="email" id="editEmail" value="${user.email}" required
+                     style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+              <label><i class="fas fa-at"></i> Username *</label>
+              <input type="text" id="editUsername" value="${user.username}" required 
+                     pattern="[a-zA-Z0-9_]+" title="Only letters, numbers, and underscores allowed"
+                     style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+              <small style="color: var(--secondary-text); font-size: 12px;">Only letters, numbers, and underscores allowed</small>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button type="button" onclick="closeUserModal()" 
+                      style="padding: 12px 20px; border: 1px solid var(--border-color); background: white; color: var(--text-color); border-radius: 8px; cursor: pointer; font-size: 14px;">
+                Cancel
+              </button>
+              <button type="submit" 
+                      style="padding: 12px 25px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+            </div>
+          </form>
+        `;
+      } else if (mode === 'view') {
+        content.innerHTML = `
+          <button class="modal-close" onclick="closeUserModal()">&times;</button>
+          <h2 style="margin-bottom: 25px; color: var(--primary-color);">
+            <i class="fas fa-user"></i> User Details
+          </h2>
+          <div style="background: #f7faff; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div>
+                <p style="margin: 8px 0;"><strong><i class="fas fa-user"></i> Name:</strong><br>
+                <span style="color: var(--text-color); font-size: 16px;">${user.first_name} ${user.last_name}</span></p>
+              </div>
+              <div>
+                <p style="margin: 8px 0;"><strong><i class="fas fa-at"></i> Username:</strong><br>
+                <span style="color: var(--primary-color); font-size: 16px;">@${user.username}</span></p>
+              </div>
+              <div>
+                <p style="margin: 8px 0;"><strong><i class="fas fa-envelope"></i> Email:</strong><br>
+                <span style="color: var(--text-color); font-size: 16px;">${user.email}</span></p>
+              </div>
+              <div>
+                ${user.is_online ? '<p style="margin: 8px 0;"><strong><i class="fas fa-circle" style="color: var(--success-color);"></i> Online Status:</strong><br><span style="color: var(--success-color); font-weight: 600; font-size: 16px;">Currently Online</span></p>' : '<p style="margin: 8px 0;"><strong><i class="fas fa-circle" style="color: var(--secondary-text);"></i> Online Status:</strong><br><span style="color: var(--secondary-text); font-weight: 600; font-size: 16px;">Offline</span></p>'}
+              </div>
+            </div>
+          </div>
+          
+          <div style="background: #f7faff; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div>
+                <p style="margin: 8px 0;"><strong><i class="fas fa-calendar-plus"></i> Created:</strong><br>
+                <span style="color: var(--text-color); font-size: 14px;">${new Date(user.created_at).toLocaleString()}</span></p>
+              </div>
+              <div>
+                <p style="margin: 8px 0;"><strong><i class="fas fa-calendar-check"></i> Last Updated:</strong><br>
+                <span style="color: var(--text-color); font-size: 14px;">${new Date(user.updated_at).toLocaleString()}</span></p>
+              </div>
+            </div>
+          </div>
+          
+          <div style="text-align: center;">
+            <button onclick="viewUserPostureHistory(${user.id})" 
+                    style="background: var(--primary-color); color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);">
+              <i class="fas fa-chart-line"></i> View Posture History
+            </button>
+          </div>
+        `;
+      }
+      modal.classList.add('active');
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').classList.remove('active');
+      editingUserId = null;
+    }
+
+
+    function viewUserPostureHistory(userId) {
+      // Close the user modal first
+      closeUserModal();
+      
+      // Show loading state
+      const modal = document.getElementById('postureHistoryModal');
+      const content = document.getElementById('postureHistoryContent');
+      content.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; color: var(--primary-color);"></i><p style="margin-top: 10px;">Loading posture history...</p></div>';
+      modal.classList.add('active');
+      
+      // Fetch posture history
+      fetch(`/admin/user/${userId}/posture-history`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            renderPostureHistory(data.user, data.history, data.stats);
+          } else {
+            content.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--danger-color);"><i class="fas fa-exclamation-triangle" style="font-size: 24px;"></i><p style="margin-top: 10px;">${data.message}</p></div>`;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          content.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--danger-color);"><i class="fas fa-exclamation-triangle" style="font-size: 24px;"></i><p style="margin-top: 10px;">An error occurred while loading posture history</p></div>`;
+        });
+    }
+
+    function renderPostureHistory(user, history, stats) {
+      const content = document.getElementById('postureHistoryContent');
+      
+      // Create statistics cards
+      const statsHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
+          <div style="background: #f7faff; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
+            <div style="font-size: 24px; font-weight: 600; color: var(--primary-color);">${stats.good_posture_percentage}%</div>
+            <div style="font-size: 12px; color: var(--secondary-text);">Good Posture</div>
+          </div>
+          <div style="background: #f7faff; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
+            <div style="font-size: 24px; font-weight: 600; color: var(--primary-color);">${stats.total_hours}</div>
+            <div style="font-size: 12px; color: var(--secondary-text);">Hours Monitored</div>
+          </div>
+          <div style="background: #f7faff; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
+            <div style="font-size: 24px; font-weight: 600; color: var(--primary-color);">${stats.total_records}</div>
+            <div style="font-size: 12px; color: var(--secondary-text);">Sessions</div>
+          </div>
+          <div style="background: #f7faff; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
+            <div style="font-size: 24px; font-weight: 600; color: var(--primary-color);">${stats.health_score}%</div>
+            <div style="font-size: 12px; color: var(--secondary-text);">Health Score</div>
+          </div>
+        </div>
+      `;
+      
+      // Create history table
+      let historyHTML = '';
+      if (history && history.length > 0) {
+        historyHTML = `
+          <div style="margin-top: 20px;">
+            <h3 style="margin-bottom: 15px; color: var(--primary-color);">Recent Sessions</h3>
+            <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f7faff; position: sticky; top: 0;">
+                  <tr>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600; color: var(--primary-color);">Date</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600; color: var(--primary-color);">Posture Type</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600; color: var(--primary-color);">Confidence</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600; color: var(--primary-color);">Duration</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${history.map(record => {
+                    const confidence_pct = (record.confidence_score * 100).toFixed(1);
+                    const duration_min = record.session_duration ? (record.session_duration / 60).toFixed(1) : 'N/A';
+                    const postureColor = record.posture_type && record.posture_type.includes('Good') ? 'var(--success-color)' : 'var(--danger-color)';
+                    const postureType = record.posture_type || 'Unknown';
+                    return `
+                      <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">${new Date(record.recorded_at).toLocaleString()}</td>
+                        <td style="padding: 12px; color: ${postureColor}; font-weight: 500;">${postureType}</td>
+                        <td style="padding: 12px;">${confidence_pct}%</td>
+                        <td style="padding: 12px;">${duration_min} min</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      } else {
+        historyHTML = `
+          <div style="text-align: center; padding: 40px; color: var(--secondary-text);">
+            <i class="fas fa-chart-line" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+            <p>No posture history available for this user.</p>
+          </div>
+        `;
+      }
+      
+      content.innerHTML = `
+        <h2 style="margin-bottom: 20px; color: var(--primary-color);">
+          <i class="fas fa-user"></i> ${user.first_name} ${user.last_name}'s Posture History
+        </h2>
+        <p style="margin-bottom: 20px; color: var(--secondary-text);">
+          <strong>Username:</strong> @${user.username} | <strong>Email:</strong> ${user.email}
+        </p>
+        ${statsHTML}
+        ${historyHTML}
+      `;
+    }
+
+    function closePostureHistoryModal() {
+      document.getElementById('postureHistoryModal').classList.remove('active');
+    }
+
+    function createUser(e) {
+      e.preventDefault();
+      const formData = {
+        firstName: document.getElementById('createFirstName').value,
+        lastName: document.getElementById('createLastName').value,
+        email: document.getElementById('createEmail').value,
+        username: document.getElementById('createUsername').value,
+        password: document.getElementById('createPassword').value,
+        birthYear: document.getElementById('createBirthYear').value,
+        birthMonth: document.getElementById('createBirthMonth').value,
+        birthDay: document.getElementById('createBirthDay').value,
+        gender: document.getElementById('createGender').value
+      };
+
+      fetch('/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          closeUserModal();
+          loadUsers();
+          alert('User created successfully!');
+        } else {
+          alert('Failed to create user: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating user');
+      });
+    }
+
+    function editUser(e) {
+      e.preventDefault();
+      const formData = {
+        firstName: document.getElementById('editFirstName').value,
+        lastName: document.getElementById('editLastName').value,
+        email: document.getElementById('editEmail').value,
+        username: document.getElementById('editUsername').value
+      };
+
+      if (!editingUserId) {
+        alert('No user selected for editing');
+        return;
+      }
+
+      fetch(`/admin/users/${editingUserId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          closeUserModal();
+          loadUsers();
+          alert('User updated successfully!');
+        } else {
+          alert('Failed to update user: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating user');
+      });
+    }
+
+    function deleteUser(id) {
+      if (confirm('Are you sure you want to delete this user?')) {
+        fetch(`/admin/users/${id}`, {
+          method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            loadUsers();
+            alert('User deleted successfully!');
+          } else {
+            alert('Failed to delete user: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while deleting user');
+        });
+      }
+    }
+
+
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+
+    function openMenu() {
+      document.getElementById('sideMenu').classList.add('active');
+      document.getElementById('overlay').classList.add('active');
+    }
+
+    function closeMenu() {
+      document.getElementById('sideMenu').classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+    }
+
+    // Initial load
+    loadUsers();
+
+    // Attach menu/overlay event listeners after DOM is loaded
+    window.onload = function() {
+      document.getElementById('overlay').addEventListener('click', closeMenu);
+      document.addEventListener('click', (e) => {
+        const sideMenu = document.getElementById('sideMenu');
+        const menuButton = document.querySelector('.menu');
+        if (!sideMenu.contains(e.target) && !menuButton.contains(e.target)) {
+          sideMenu.classList.remove('active');
+          document.getElementById('overlay').classList.remove('active');
+        }
+      });
+    }
+  </script>
+</body>
+</html> 
