@@ -2253,10 +2253,28 @@ def export_posture_history():
         story.append(Paragraph("Posture Health Analysis Report", subtitle_style))
         story.append(Spacer(1, 30))
         
+        # Get user information for the report
+        user_name = "Unknown User"
+        try:
+            conn = get_db_connection()
+            if conn:
+                cursor = conn.cursor(dictionary=True)
+                cursor.execute("SELECT first_name, last_name, username FROM users WHERE id = %s", (user_id,))
+                user_data = cursor.fetchone()
+                cursor.close()
+                conn.close()
+                
+                if user_data:
+                    user_name = f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip()
+                    if not user_name:
+                        user_name = user_data.get('username', 'Unknown User')
+        except Exception as e:
+            logger.warning(f"Could not fetch user name for report: {e}")
+        
         # Report info
         report_info_data = [
             ['Report Generated', datetime.now().strftime('%B %d, %Y at %I:%M %p')],
-            ['User ID', str(user_id)],
+            ['User', user_name],
             ['Report Type', 'Posture Health Analysis'],
             ['Analysis Period', f"Last {total_sessions} sessions" if total_sessions > 0 else "No data available"]
         ]
