@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PosturEase{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+    {% block extra_head %}{% endblock %}
+    <style>
+        :root {
+            --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --text-black: rgba(0, 0, 0, 1);
+            --background-color: #e8fefb;
+            --text-color: rgba(0, 0, 0, 1);
+            --card-background: white;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-color: #f5f5f5;
+            --primary-color: #007AFF;
+            --success-color: #34c759;
+            --warning-color: #ff9500;
+            --danger-color: #ff3b30;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            font-family: var(--font-family-sf);
+            width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    {% block content %}{% endblock %}
+    
+    <!-- Global Modal System -->
+    <div id="globalModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Notification</h3>
+                <span class="modal-close" onclick="closeGlobalModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">This is a modal message.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="modalOkBtn" class="modal-btn modal-btn-primary" onclick="closeGlobalModal()">OK</button>
+                <button id="modalCancelBtn" class="modal-btn modal-btn-secondary" onclick="closeGlobalModal()" style="display: none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            font-size: 24px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+        }
+
+        .modal-body p {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        .modal-footer {
+            padding: 16px 24px 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+
+        .modal-btn-primary {
+            background-color: #007AFF;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background-color: #0056CC;
+        }
+
+        .modal-btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Success Modal */
+        .modal-success .modal-header h3 {
+            color: #34c759;
+        }
+
+        /* Error Modal */
+        .modal-error .modal-header h3 {
+            color: #ff3b30;
+        }
+
+        /* Warning Modal */
+        .modal-warning .modal-header h3 {
+            color: #ff9500;
+        }
+    </style>
+
+    <script>
+        // Global Modal Functions
+        function showModal(title, message, type = 'info', showCancel = false, onConfirm = null) {
+            const modal = document.getElementById('globalModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalOkBtn = document.getElementById('modalOkBtn');
+            const modalCancelBtn = document.getElementById('modalCancelBtn');
+            
+            // Set content
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            
+            // Set type styling
+            modal.className = 'modal modal-' + type;
+            
+            // Show/hide cancel button
+            modalCancelBtn.style.display = showCancel ? 'block' : 'none';
+            
+            // Set up confirm action
+            if (onConfirm) {
+                modalOkBtn.onclick = function() {
+                    onConfirm();
+                    closeGlobalModal();
+                };
+            } else {
+                modalOkBtn.onclick = closeGlobalModal;
+            }
+            
+            // Show modal
+            modal.style.display = 'flex';
+            
+            // Focus on OK button
+            setTimeout(() => modalOkBtn.focus(), 100);
+        }
+
+        function closeGlobalModal() {
+            const modal = document.getElementById('globalModal');
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('globalModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGlobalModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeGlobalModal();
+            }
+        });
+
+        // Convenience functions
+        function showSuccessModal(message) {
+            showModal('Success', message, 'success');
+        }
+
+        function showErrorModal(message) {
+            showModal('Error', message, 'error');
+        }
+
+        function showWarningModal(message) {
+            showModal('Warning', message, 'warning');
+        }
+
+        function showInfoModal(message) {
+            showModal('Information', message, 'info');
+        }
+
+        function showConfirmModal(title, message, onConfirm) {
+            showModal(title, message, 'warning', true, onConfirm);
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

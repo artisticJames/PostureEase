@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PosturEase - My Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+  <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+  <style>
+    :root {
+      --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --text-black: rgba(0, 0, 0, 1);
+      --primary-color: #007AFF;
+      --background-color: #e8fefb;
+      --text-color: var(--text-black);
+      --card-background: rgba(255, 255, 255, 0.95);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --border-color: #eee;
+      --input-background: #f8f9fa;
+      --secondary-text: #666;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      font-family: var(--font-family-sf);
+      min-height: 100vh;
+    }
+    .background-images {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 0;
+      }
+  
+      .background-images img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .center-logo-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 10px;
+      z-index: 1;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .center-logo-container:hover .logo {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-color);
+      letter-spacing: -0.02em;
+    }
+
+    .menu-button {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      margin-left: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .menu-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .menu-button img {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-button:hover img {
+      transform: scale(1.1);
+    }
+
+    .profile-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 30px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-card {
+      background: var(--card-background);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      position: relative;
+      z-index: 1;
+    }
+
+    .gradient-card {
+      background: linear-gradient(135deg, #E3F2FD 0%, #E8F5E8 100%);
+      color: #1E293B;
+      box-shadow: 0 8px 32px rgba(0, 102, 255, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gradient-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #F0F8FF 0%, #F0FFF4 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 0;
+    }
+
+    .gradient-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 102, 255, 0.2);
+    }
+
+    .gradient-card:hover::before {
+      opacity: 1;
+    }
+
+    .gradient-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-stats {
+      display: flex;
+      flex-direction: column;
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(30, 41, 59, 0.1);
+    }
+
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 0 10px;
+    }
+
+
+    .stats-container {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .stat-item {
+      text-align: center;
+      flex: 1;
+      padding: 20px 10px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .stat-item:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-item:hover::before {
+      opacity: 1;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1E293B;
+      margin-bottom: 8px;
+      line-height: 1;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-item:hover .stat-value {
+      transform: scale(1.05);
+      color: #0066FF;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #64748B;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-item:hover .stat-label {
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 3px solid var(--primary-color);
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+
+    .profile-pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-pic-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 122, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      color: white;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .profile-pic:hover .profile-pic-overlay {
+      opacity: 1;
+    }
+
+    .profile-pic-overlay i {
+      font-size: 16px;
+      margin-bottom: 2px;
+    }
+
+    .profile-pic-overlay span {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .profile-name {
+      flex: 1;
+    }
+
+    .profile-name h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .profile-name p {
+      margin: 5px 0 0;
+      font-size: 14px;
+      color: var(--secondary-text);
+    }
+    
+    
+    .profile-info-section {
+      margin-top: 30px;
+    }
+    
+    .info-section {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 24px;
+      padding: 32px;
+      border: 1px solid rgba(0, 102, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 102, 255, 0.06);
+      backdrop-filter: blur(10px);
+    }
+    
+    .info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(0, 102, 255, 0.06);
+    }
+    
+    .info-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.02em;
+    }
+    
+    .info-title i {
+      color: #0066FF;
+      font-size: 1.1rem;
+      background: rgba(0, 102, 255, 0.1);
+      padding: 8px;
+      border-radius: 10px;
+    }
+    
+    .edit-info-btn {
+      background: linear-gradient(135deg, #0066FF, #0047CC);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      box-shadow: 0 6px 20px rgba(0, 102, 255, 0.25);
+      letter-spacing: 0.01em;
+    }
+    
+    .edit-info-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 102, 255, 0.35);
+      background: linear-gradient(135deg, #0047CC, #003399);
+    }
+    
+    .info-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: rgba(248, 250, 252, 0.6);
+      border-radius: 16px;
+      border: 1px solid rgba(0, 102, 255, 0.05);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+    
+    .info-row:hover {
+      background: rgba(240, 248, 255, 0.8);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 102, 255, 0.08);
+      border-color: rgba(0, 102, 255, 0.12);
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #64748B;
+      font-size: 1rem;
+      letter-spacing: 0.01em;
+    }
+    
+    .info-value {
+      font-weight: 500;
+      color: #0F172A;
+      font-size: 1rem;
+      letter-spacing: 0.01em;
+    }
+
+    .info-section {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .info-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-color);
+    }
+
+    .edit-icon {
+      cursor: pointer;
+      padding: 8px;
+      color: var(--primary-color);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .edit-icon:hover {
+      background: rgba(0, 122, 255, 0.1);
+      transform: scale(1.1);
+      color: #0056CC;
+    }
+
+    .edit-icon:active {
+      transform: scale(0.95);
+    }
+
+    .info-content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-color);
+      transition: all 0.3s ease;
+    }
+
+    .info-row {
+      padding: 8px 0;
+      transition: all 0.3s ease;
+      border-radius: 6px;
+      margin: 2px 0;
+    }
+
+    .info-row:hover {
+      background: rgba(0, 122, 255, 0.05);
+      padding-left: 8px;
+    }
+
+    /* Loading Animation */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .loading {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Success Feedback */
+    .success-message {
+      background: #10B981;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-weight: 500;
+      transform: translateY(-10px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .success-message.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .info-row {
+      margin-bottom: 10px;
+    }
+
+    .info-row strong {
+      display: inline-block;
+      width: 120px;
+      color: var(--secondary-text);
+    }
+
+    /* Edit form styles */
+    .edit-form {
+      display: none;
+      background: var(--input-background);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .edit-form.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--secondary-text);
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: var(--font-family-sf);
+      background-color: var(--input-background);
+      color: var(--text-color);
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 15px;
+    }
+
+    /* Modern Form Styling */
+    .modern-form {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      padding: 0;
+    }
+    
+    .form-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 28px;
+      border: 1px solid rgba(0, 102, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 102, 255, 0.08);
+    }
+    
+    .section-header {
+      margin-bottom: 24px;
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1E293B;
+      margin: 0 0 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-title i {
+      color: #0066FF;
+      font-size: 1rem;
+    }
+    
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(90deg, #0066FF, transparent);
+      border-radius: 1px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    @media (min-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .form-card {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 102, 255, 0.08);
+      border: 1px solid rgba(0, 102, 255, 0.1);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .form-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 102, 255, 0.12);
+      border-color: rgba(0, 102, 255, 0.2);
+    }
+    
+    .gender-card {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: #1E293B;
+      margin-bottom: 12px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-label i {
+      color: #0066FF;
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .optional-badge {
+      background: #E2E8F0;
+      color: #64748B;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      margin-left: auto;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 16px 18px;
+      border: 2px solid #E0F2FE;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #1E293B;
+      background: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+      height: 48px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #0066FF;
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .form-input::placeholder {
+      color: #94A3B8;
+      font-weight: 400;
+    }
+    
+    /* Gender Segmented Control */
+    .gender-segmented-control {
+      display: flex;
+      background: rgba(240, 248, 255, 0.8);
+      border-radius: 12px;
+      padding: 4px;
+      border: 1px solid rgba(0, 102, 255, 0.1);
+      gap: 4px;
+    }
+    
+    .gender-segment {
+      flex: 1;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .gender-segment input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .gender-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 12px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: transparent;
+      border: 2px solid transparent;
+      text-align: center;
+    }
+    
+    .gender-icon {
+      font-size: 1.2rem;
+      color: #64748B;
+      transition: all 0.3s ease;
+    }
+    
+    .gender-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748B;
+      transition: all 0.3s ease;
+    }
+    
+    .gender-segment:hover .gender-content {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(0, 102, 255, 0.2);
+      transform: translateY(-1px);
+    }
+    
+    .gender-segment:hover .gender-icon,
+    .gender-segment:hover .gender-text {
+      color: #0066FF;
+    }
+    
+    .gender-segment input[type="radio"]:checked + .gender-content {
+      background: linear-gradient(135deg, #0066FF, #0047CC);
+      border-color: #0066FF;
+      box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .gender-segment input[type="radio"]:checked + .gender-content .gender-icon,
+    .gender-segment input[type="radio"]:checked + .gender-content .gender-text {
+      color: white;
+    }
+
+    /* Gender Options Styling */
+    .gender-options {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .gender-option {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px;
+      border: 2px solid #E2E8F0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #FFFFFF;
+      position: relative;
+    }
+
+    .gender-option:hover {
+      border-color: #0066FF;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
+    }
+
+    .gender-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .gender-option input[type="radio"]:checked + .gender-icon + .gender-text {
+      color: #0066FF;
+    }
+
+    .gender-option input[type="radio"]:checked ~ * {
+      color: #0066FF;
+    }
+
+    .gender-option:has(input:checked) {
+      border-color: #0066FF;
+      background: rgba(0, 102, 255, 0.05);
+      box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
+    }
+
+    .gender-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #64748B;
+      transition: all 0.3s ease;
+    }
+
+    .gender-text {
+      font-weight: 600;
+      color: #475569;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    /* Form Actions */
+    .form-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .btn-cancel, .btn-save {
+      flex: 1;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-cancel {
+      background: #F8FAFC;
+      color: #64748B;
+      border: 2px solid #E2E8F0;
+    }
+
+    .btn-cancel:hover {
+      background: #F1F5F9;
+      border-color: #CBD5E1;
+      transform: translateY(-2px);
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+    }
+
+    .btn-save:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 102, 255, 0.4);
+    }
+
+    .btn-save:active {
+      transform: translateY(0);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .form-card {
+        padding: 20px;
+      }
+      
+      .gender-options {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .gender-option {
+        flex-direction: row;
+        padding: 16px;
+        text-align: left;
+      }
+      
+      .gender-icon {
+        margin-bottom: 0;
+        margin-right: 12px;
+        font-size: 20px;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+    }
+
+    /* Side Menu Styles (copied from dashboard) */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background-color: var(--card-background);
+      box-shadow: -2px 0 10px var(--shadow-color);
+      transition: all 0.3s ease-in-out;
+      z-index: 1000;
+      padding: 20px;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    .side-menu.active {
+      right: 0;
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .menu-item {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: 8px;
+      margin: 5px 0;
+    }
+
+    .menu-item:hover {
+      background: var(--neutral-100);
+      transform: translateX(4px);
+    }
+
+    .menu-item.active {
+      background: var(--primary-blue);
+      color: var(--text-inverse);
+    }
+
+    .menu-item.active i {
+      color: var(--text-inverse);
+    }
+
+    .menu-item i {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+      color: var(--primary-color);
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .menu-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-color);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+      z-index: 999;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .menu-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-bottom: 30px;
+      padding: 0 15px;
+    }
+
+    .menu-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .menu-header-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .logout-item {
+      color: #ff3b30 !important;
+    }
+
+    /* Face recognition styles removed */
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div class="background-images">
+    <img src="{{ url_for('static', filename='images/image-6-2.png') }}" alt="Background 1" />
+    <img src="{{ url_for('static', filename='images/image-6-3.png') }}" alt="Background 2" />
+  </div>
+
+  <div class="top-bar">
+    <div class="center-logo-container">
+      <img class="logo" src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo">
+      <div class="logo-text">PosturEase</div>
+    </div>
+    <button class="menu-button" onclick="toggleMenu()">
+      <img src="{{ url_for('static', filename='images/icon-9.svg') }}" alt="Menu">
+    </button>
+  </div>
+
+  <div class="profile-container">
+    <h1 class="profile-title">My Profile</h1>
+    
+    <div class="profile-card gradient-card">
+      <div class="profile-header">
+        <div class="profile-pic" onclick="document.getElementById('profile-picture-input').click()">
+          <img id="profile-picture" src="{% if profile_picture %}{{ profile_picture }}{% else %}{{ url_for('static', filename='images/icon-5.svg') }}{% endif %}" alt="Profile Picture" onerror="this.src='/static/images/icon-5.svg'">
+          <div class="profile-pic-overlay">
+            <i class="fas fa-camera"></i>
+            <span>Change Photo</span>
+          </div>
+        </div>
+        <div class="profile-name">
+          <h2 id="full-name">{{ user.first_name }} {{ user.last_name }}</h2>
+          <p id="username">@{{ user.username }}</p>
+        </div>
+      </div>
+      
+      <!-- Stats Section -->
+      <div class="profile-stats">
+        <div class="stats-header">
+          <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #1E293B;">Your Progress</h3>
+        </div>
+        <div class="stats-container">
+          <div class="stat-item">
+            <div class="stat-value" id="sessions-count">Loading...</div>
+            <div class="stat-label">SESSIONS</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="good-posture-percent">Loading...</div>
+            <div class="stat-label">GOOD POSTURE</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="total-time">Loading...</div>
+            <div class="stat-label">TOTAL TIME</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Hidden file input for profile picture upload -->
+      <input type="file" id="profile-picture-input" accept="image/*,.jfif,.webp" style="display: none;" onchange="handleProfilePictureUpload(this)">
+      
+      <!-- Profile Information Display -->
+      <div class="profile-info-section" id="personal-content">
+        <div class="info-section">
+          <div class="info-header">
+            <div class="info-title">
+              <i class="fas fa-user"></i>
+              Personal Information
+            </div>
+            <button class="edit-info-btn" onclick="toggleEdit('personal')">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+          
+          <div class="info-grid">
+            <div class="info-row">
+              <div class="info-label">Full Name:</div>
+              <div class="info-value" id="display-full-name">{{ user.first_name }} {{ user.last_name }}</div>
+            </div>
+            
+            <div class="info-row">
+              <div class="info-label">Email:</div>
+              <div class="info-value" id="display-email">{{ user.email }}</div>
+            </div>
+            
+            <div class="info-row">
+              <div class="info-label">Username:</div>
+              <div class="info-value" id="display-username">@{{ user.username }}</div>
+            </div>
+            
+            <div class="info-row">
+              <div class="info-label">Birth Date:</div>
+              <div class="info-value" id="display-birth-date">{{ user.birth_date or 'Not set' }}</div>
+            </div>
+            
+            <div class="info-row">
+              <div class="info-label">Gender:</div>
+              <div class="info-value" id="display-gender">{{ user.gender or 'Not set' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="edit-form modern-form" id="personal-form" style="display: none;">
+        <!-- Personal Information Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-user"></i>
+              Personal Information
+            </h3>
+            <div class="section-divider"></div>
+          </div>
+          
+          <div class="form-grid">
+            <!-- Full Name Card -->
+            <div class="form-card">
+              <label for="edit-name" class="form-label">
+                <i class="fas fa-user"></i>
+                Full Name
+              </label>
+              <input type="text" id="edit-name" class="form-input" required placeholder="Enter your full name">
+            </div>
+
+            <!-- Email Card -->
+            <div class="form-card">
+              <label for="edit-email" class="form-label">
+                <i class="fas fa-envelope"></i>
+                Email Address
+              </label>
+              <input type="email" id="edit-email" class="form-input" required placeholder="Enter your email">
+            </div>
+
+            <!-- Username Card -->
+            <div class="form-card">
+              <label for="edit-username" class="form-label">
+                <i class="fas fa-at"></i>
+                Username
+              </label>
+              <input type="text" id="edit-username" class="form-input" required placeholder="Choose a username">
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Details Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-cog"></i>
+              Account Details
+            </h3>
+            <div class="section-divider"></div>
+          </div>
+          
+          <div class="form-grid">
+            <!-- Birth Date Card -->
+            <div class="form-card">
+              <label for="edit-birth-date" class="form-label">
+                <i class="fas fa-calendar"></i>
+                Birth Date
+                <span class="optional-badge">Optional</span>
+              </label>
+              <input type="date" id="edit-birth-date" class="form-input">
+            </div>
+
+            <!-- Gender Card -->
+            <div class="form-card gender-card">
+              <label class="form-label">
+                <i class="fas fa-venus-mars"></i>
+                Gender
+              </label>
+              <div class="gender-segmented-control">
+                <label class="gender-segment">
+                  <input type="radio" name="gender" value="male" id="gender-male">
+                  <span class="gender-content">
+                    <span class="gender-icon">♂</span>
+                    <span class="gender-text">Male</span>
+                  </span>
+                </label>
+                <label class="gender-segment">
+                  <input type="radio" name="gender" value="female" id="gender-female">
+                  <span class="gender-content">
+                    <span class="gender-icon">♀</span>
+                    <span class="gender-text">Female</span>
+                  </span>
+                </label>
+                <label class="gender-segment">
+                  <input type="radio" name="gender" value="other" id="gender-other">
+                  <span class="gender-content">
+                    <span class="gender-icon">⚧</span>
+                    <span class="gender-text">Other</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="cancelEdit('personal')">
+            <i class="fas fa-times"></i>
+            Cancel
+          </button>
+          <button type="button" class="btn-save" onclick="saveEdit('personal')">
+            <i class="fas fa-check"></i>
+            Save Changes
+          </button>
+        </div>
+      </div>
+      </div>
+
+      <!-- Face recognition section removed -->
+    </div>
+  </div>
+
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <button class="menu-close" onclick="toggleMenu()">&times;</button>
+    <div class="menu-header">
+      <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo">
+      <span class="menu-header-text">PosturEase</span>
+    </div>
+    <nav class="menu-items">
+      <a href="{{ url_for('index') }}" class="menu-item">
+        <i class="fas fa-home"></i>
+        Home
+      </a>
+      <a href="{{ url_for('profile') }}" class="menu-item active">
+        <i class="fas fa-user"></i>
+        View Profile
+      </a>
+      <a href="{{ url_for('exercises') }}" class="menu-item">
+        <i class="fas fa-dumbbell"></i>
+        Stretching & Exercises
+      </a>
+      <a href="{{ url_for('posture_history') }}" class="menu-item">
+        <i class="fas fa-history"></i>
+        Posture History
+      </a>
+      <a href="{{ url_for('settings') }}" class="menu-item">
+        <i class="fas fa-cog"></i>
+        Settings
+      </a>
+      <a href="#" class="menu-item logout-item" onclick="logout(); return false;">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </a>
+    </nav>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <script>
+    // Get user data from localStorage
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    
+    // Global variables for stats management
+    let statsPollingInterval = null;
+    let isRefreshing = false;
+
+    // Load user stats
+    function loadUserStats(showLoading = true) {
+      // Add loading state if requested
+      if (showLoading) {
+        const statValues = document.querySelectorAll('.stat-value');
+        statValues.forEach(value => {
+          value.classList.add('loading');
+        });
+      }
+
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      fetch('/get-user-stats', { signal: controller.signal })
+        .then(response => {
+          console.log('Stats response status:', response.status);
+          if (response.redirected) {
+            console.log('Redirected to:', response.url);
+            // User not logged in, set default values
+            document.getElementById('sessions-count').textContent = '0';
+            document.getElementById('good-posture-percent').textContent = '0%';
+            document.getElementById('total-time').textContent = '0h';
+            return;
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data && data.success) {
+            console.log('Stats data received:', data);
+            updateStatsDisplay(data.stats);
+          } else {
+            console.error('Failed to load user stats:', data ? data.message : 'No data received');
+            // Set default values
+            updateStatsDisplay({ sessions: 0, good_posture_percent: 0, total_time_hours: 0 });
+          }
+        })
+        .catch(error => {
+          if (error.name === 'AbortError') {
+            console.log('Stats request timed out, using cached or default values');
+          } else {
+            console.error('Error loading user stats:', error);
+          }
+          // Set default values
+          updateStatsDisplay({ sessions: 0, good_posture_percent: 0, total_time_hours: 0 });
+        })
+        .finally(() => {
+          // Clear timeout
+          clearTimeout(timeoutId);
+          
+          // Remove loading state
+          const statValues = document.querySelectorAll('.stat-value');
+          statValues.forEach(value => {
+            value.classList.remove('loading');
+          });
+          
+          // Reset refreshing state
+          if (isRefreshing) {
+            isRefreshing = false;
+          }
+        });
+    }
+
+    // Update stats display with animation
+    function updateStatsDisplay(stats) {
+      const sessionsElement = document.getElementById('sessions-count');
+      const postureElement = document.getElementById('good-posture-percent');
+      const timeElement = document.getElementById('total-time');
+
+      // Animate number changes
+      animateNumberChange(sessionsElement, stats.sessions || 0, 0);
+      animateNumberChange(postureElement, (stats.good_posture_percent || 0) + '%', '0%');
+      animateNumberChange(timeElement, (stats.total_time_hours || 0) + 'h', '0h');
+    }
+
+    // Animate number changes
+    function animateNumberChange(element, newValue, oldValue) {
+      if (element.textContent !== newValue) {
+        element.style.transform = 'scale(1.1)';
+        element.style.color = '#0066FF';
+        element.textContent = newValue;
+        
+        setTimeout(() => {
+          element.style.transform = 'scale(1)';
+          element.style.color = '#1E293B';
+        }, 300);
+      } else {
+        element.textContent = newValue;
+      }
+    }
+
+
+    // Start automatic polling
+    function startStatsPolling() {
+      // Clear existing interval
+      if (statsPollingInterval) {
+        clearInterval(statsPollingInterval);
+      }
+      
+      // Poll every 5 seconds for faster updates
+      statsPollingInterval = setInterval(() => {
+        loadUserStats(false); // Don't show loading animation for background updates
+      }, 5000);
+    }
+
+    // Stop automatic polling
+    function stopStatsPolling() {
+      if (statsPollingInterval) {
+        clearInterval(statsPollingInterval);
+        statsPollingInterval = null;
+      }
+    }
+
+    function showSuccessMessage(message) {
+      // Create success message element
+      const successDiv = document.createElement('div');
+      successDiv.className = 'success-message';
+      successDiv.textContent = message;
+      
+      // Insert at the top of the profile card
+      const profileCard = document.querySelector('.gradient-card');
+      profileCard.insertBefore(successDiv, profileCard.firstChild);
+      
+      // Show the message
+      setTimeout(() => {
+        successDiv.classList.add('show');
+      }, 100);
+      
+      // Hide after 3 seconds
+      setTimeout(() => {
+        successDiv.classList.remove('show');
+        setTimeout(() => {
+          successDiv.remove();
+        }, 300);
+      }, 3000);
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // First, try to load from localStorage for immediate display
+      const storedUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      console.log('Stored user data:', storedUser);
+      
+      // Set default values immediately if no stored data
+      if (!storedUser.first_name && !storedUser.last_name && !storedUser.username) {
+        console.log('No stored user data, setting defaults');
+        document.getElementById('full-name').textContent = 'User';
+        document.getElementById('username').textContent = '@user';
+      } else if (storedUser.first_name || storedUser.last_name || storedUser.username) {
+        const fullName = `${storedUser.first_name || ''} ${storedUser.last_name || ''}`.trim();
+        console.log('Loading from localStorage - fullName:', fullName);
+        if (fullName) {
+          const fullNameElement = document.getElementById('full-name');
+          if (fullNameElement) {
+            fullNameElement.textContent = fullName;
+            console.log('Updated from localStorage:', fullNameElement.textContent);
+          }
+        }
+        if (storedUser.username) document.getElementById('username').textContent = `@${storedUser.username}`;
+        
+        // Also update the Personal Information section from localStorage
+        if (storedUser.email) document.getElementById('display-email').textContent = storedUser.email;
+        if (storedUser.username) document.getElementById('display-username').textContent = `@${storedUser.username}`;
+      }
+      
+      // Add a fallback timeout to set default values if nothing loads
+      setTimeout(() => {
+        const fullNameElement = document.getElementById('full-name');
+        if (fullNameElement && fullNameElement.textContent === 'Loading...') {
+          console.log('Timeout reached - setting default name');
+          fullNameElement.textContent = 'User';
+        }
+        const usernameElement = document.getElementById('username');
+        if (usernameElement && usernameElement.textContent === '@loading...') {
+          console.log('Timeout reached - setting default username');
+          usernameElement.textContent = '@user';
+        }
+      }, 3000); // 3 second timeout
+      
+      // Then fetch latest user data from server
+      fetch('/get-user-data')
+        .then(response => {
+          console.log('User data response status:', response.status);
+          if (response.redirected) {
+            console.log('User data request redirected to:', response.url);
+            return null;
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data && data.success) {
+            const user = data.user;
+            console.log('User data received:', user);
+            // Update localStorage with latest data
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Update profile information
+            const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+            console.log('Updating profile header with:', fullName);
+            
+            const fullNameElement = document.getElementById('full-name');
+            if (fullNameElement) {
+              fullNameElement.textContent = fullName;
+              console.log('Updated full-name element:', fullNameElement.textContent);
+            } else {
+              console.log('full-name element not found!');
+            }
+            
+            // Update username in profile header
+            document.getElementById('username').textContent = `@${user.username || ''}`;
+            
+            // Update the Personal Information section
+            document.getElementById('display-full-name').textContent = fullName;
+            document.getElementById('display-email').textContent = user.email || '';
+            document.getElementById('display-username').textContent = `@${user.username || ''}`;
+            
+            // Update birth date in Personal Information section
+            if (user.birth_date) {
+              const date = new Date(user.birth_date);
+              const formattedDate = date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              });
+              document.getElementById('display-birth-date').textContent = formattedDate;
+            } else {
+              document.getElementById('display-birth-date').textContent = 'Not set';
+            }
+            
+            // Update gender in Personal Information section
+            if (user.gender) {
+              const formattedGender = user.gender.charAt(0).toUpperCase() + user.gender.slice(1).toLowerCase();
+              document.getElementById('display-gender').textContent = formattedGender;
+            } else {
+              document.getElementById('display-gender').textContent = 'Not set';
+            }
+            // Remove updates to non-existent elements (avoid null textContent errors)
+            
+            // Update profile picture if available
+            if (user.profile_picture) {
+              document.getElementById('profile-picture').src = user.profile_picture + '?t=' + new Date().getTime();
+            }
+            
+            // Load user stats after user data is loaded
+            loadUserStats();
+          } else {
+            console.error('Failed to fetch user data:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+          // Fallback: try to get data from localStorage
+          const fallbackUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+          if (fallbackUser.first_name || fallbackUser.last_name || fallbackUser.username) {
+            const fullName = `${fallbackUser.first_name || ''} ${fallbackUser.last_name || ''}`.trim();
+            if (fullName) document.getElementById('full-name').textContent = fullName;
+            if (fallbackUser.username) document.getElementById('username').textContent = `@${fallbackUser.username}`;
+            
+            // Also update Personal Information section from localStorage
+            if (fallbackUser.email) document.getElementById('display-email').textContent = fallbackUser.email;
+            if (fallbackUser.username) document.getElementById('display-username').textContent = `@${fallbackUser.username}`;
+            if (fallbackUser.birth_date) {
+              const date = new Date(fallbackUser.birth_date);
+              const formattedDate = date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              });
+              document.getElementById('display-birth-date').textContent = formattedDate;
+            }
+            if (fallbackUser.gender) {
+              const formattedGender = fallbackUser.gender.charAt(0).toUpperCase() + fallbackUser.gender.slice(1).toLowerCase();
+              document.getElementById('display-gender').textContent = formattedGender;
+            }
+          }
+        });
+    });
+
+    // Add smooth animations on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load stats immediately when page loads
+      loadUserStats(true);
+      
+      // Start stats polling when page loads
+      startStatsPolling();
+      
+      // Animate profile card on load
+      const profileCard = document.querySelector('.gradient-card');
+      if (profileCard) {
+        profileCard.style.opacity = '0';
+        profileCard.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          profileCard.style.transition = 'all 0.6s ease';
+          profileCard.style.opacity = '1';
+          profileCard.style.transform = 'translateY(0)';
+        }, 100);
+      }
+
+      // Animate stats on load
+      const statItems = document.querySelectorAll('.stat-item');
+      statItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          item.style.transition = 'all 0.4s ease';
+          item.style.opacity = '1';
+          item.style.transform = 'translateY(0)';
+        }, 200 + (index * 100));
+      });
+    });
+
+    function toggleEdit(section) {
+      const contentElement = document.getElementById(`${section}-content`);
+      const formElement = document.getElementById(`${section}-form`);
+      
+      // Hide content and show edit form
+      if (contentElement) {
+        contentElement.style.display = 'none';
+      }
+      if (formElement) {
+        formElement.style.display = 'block';
+        formElement.classList.add('active');
+      }
+
+      // Pre-fill form fields
+      if (section === 'personal') {
+        const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        document.getElementById('edit-name').value = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        document.getElementById('edit-email').value = user.email || '';
+        document.getElementById('edit-username').value = user.username || '';
+        document.getElementById('edit-birth-date').value = user.birth_date || '';
+        
+        // Set gender radio button
+        const gender = user.gender || '';
+        if (gender) {
+          const genderRadio = document.getElementById(`gender-${gender}`);
+          if (genderRadio) {
+            genderRadio.checked = true;
+          }
+        }
+      }
+    }
+
+    function cancelEdit(section) {
+      const contentElement = document.getElementById(`${section}-content`);
+      const formElement = document.getElementById(`${section}-form`);
+      
+      // Show content and hide edit form
+      if (contentElement) {
+        contentElement.style.display = 'block';
+      }
+      if (formElement) {
+        formElement.style.display = 'none';
+        formElement.classList.remove('active');
+      }
+      
+      // Reset the saving flag
+      window.isSaving = false;
+      
+      // Show success message
+      showSuccessMessage('Changes cancelled');
+    }
+
+    function saveEdit(section) {
+      console.log('saveEdit called for section:', section);
+      
+      // Prevent multiple simultaneous saves
+      if (window.isSaving) {
+        showSuccessMessage('Please wait, saving in progress...');
+        return;
+      }
+      
+      window.isSaving = true;
+      
+      if (section === 'personal') {
+        console.log('Processing personal form...');
+        const newName = document.getElementById('edit-name').value.trim();
+        const newEmail = document.getElementById('edit-email').value.trim();
+        const newUsername = document.getElementById('edit-username').value.trim();
+        const newBirthDate = document.getElementById('edit-birth-date').value.trim();
+        const newGender = document.querySelector('input[name="gender"]:checked')?.value || '';
+        
+        console.log('Form values:', { newName, newEmail, newUsername, newBirthDate, newGender });
+
+        // Validate required inputs
+        if (!newName || !newEmail || !newUsername || !newGender) {
+          console.log('Validation failed - missing required fields');
+          showSuccessMessage('Please fill in all required fields (Name, Email, Username, and Gender)');
+          window.isSaving = false;
+          return;
+        }
+
+        // Split name into first and last name
+        const nameParts = newName.split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ');
+
+        // Prepare data for update
+        const formData = {
+          firstName: firstName,
+          lastName: lastName,
+          email: newEmail,
+          username: newUsername,
+          gender: newGender
+        };
+
+        // Only include optional fields if they have values
+        if (newBirthDate) formData.birth_date = newBirthDate;
+        
+        console.log('Sending data:', formData);
+
+        // Send update request
+        fetch('/update-profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Update localStorage with new user data
+            localStorage.setItem('currentUser', JSON.stringify(data.user));
+            
+            // Update display using the correct IDs
+            const fullNameElement = document.getElementById('display-full-name');
+            const emailElement = document.getElementById('display-email');
+            const usernameElement = document.getElementById('display-username');
+            const birthDateElement = document.getElementById('display-birth-date');
+            const genderElement = document.getElementById('display-gender');
+            
+            if (fullNameElement) fullNameElement.textContent = newName;
+            if (emailElement) emailElement.textContent = newEmail;
+            if (usernameElement) usernameElement.textContent = `@${newUsername}`;
+            
+            if (newBirthDate && birthDateElement) {
+              birthDateElement.textContent = newBirthDate;
+            }
+            
+            if (genderElement) {
+              const formattedGender = newGender.charAt(0).toUpperCase() + newGender.slice(1).toLowerCase();
+              genderElement.textContent = formattedGender;
+            }
+            
+            // Also update the profile header
+            document.getElementById('full-name').textContent = newName;
+            document.getElementById('username').textContent = `@${newUsername}`;
+
+            showSuccessMessage('Profile updated successfully!');
+            cancelEdit(section);
+          } else {
+            showSuccessMessage('Error: ' + (data.message || 'Failed to update profile'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showSuccessMessage('Error: ' + error.message);
+        })
+        .finally(() => {
+          // Reset the saving flag
+          window.isSaving = false;
+        });
+      }
+    }
+
+    function toggleMenu() {
+      const sideMenu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('overlay');
+      sideMenu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const sideMenu = document.getElementById('sideMenu');
+      const menuButton = document.querySelector('.menu-button');
+      if (!sideMenu.contains(e.target) && !menuButton.contains(e.target)) {
+        sideMenu.classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+      }
+    });
+
+    // Check authentication
+    window.onload = function() {
+      if (localStorage.getItem('isLoggedIn') !== 'true') {
+        window.location.href = "{{ url_for('login') }}";
+      }
+    }
+
+    // Handle page visibility changes to pause/resume polling
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        // Page is hidden, stop polling to save resources
+        stopStatsPolling();
+      } else {
+        // Page is visible, resume polling and refresh stats
+        startStatsPolling();
+        loadUserStats(false); // Refresh stats without loading animation
+      }
+    });
+
+    // Clean up polling when page is unloaded
+    window.addEventListener('beforeunload', function() {
+      stopStatsPolling();
+    });
+
+    function handleProfilePictureUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/jfif', 'image/webp'];
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.jfif', '.webp'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      
+      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+        showErrorModal('Please select a valid image file (JPEG, PNG, GIF, JFIF, or WEBP)');
+        input.value = '';
+        return;
+      }
+
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        showErrorModal('File size must be less than 5MB');
+        input.value = '';
+        return;
+      }
+
+      // Show loading state
+      const profilePic = document.getElementById('profile-picture');
+      profilePic.style.opacity = '0.5';
+      profilePic.style.transform = 'scale(0.95)';
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append('profile_picture', file);
+
+      // Upload file
+      fetch('/upload-profile-picture', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update profile picture with cache busting
+          profilePic.src = data.profile_picture_url + '?t=' + new Date().getTime();
+          profilePic.style.opacity = '1';
+          profilePic.style.transform = 'scale(1)';
+          
+          // Update localStorage
+          const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+          currentUser.profile_picture = data.profile_picture_url;
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          
+          showSuccessModal('Profile picture updated successfully!');
+        } else {
+          showErrorModal('Error: ' + (data.message || 'Failed to upload profile picture'));
+        }
+      })
+      .catch(error => {
+        console.error('Error uploading profile picture:', error);
+        showErrorModal('Error: ' + error.message);
+      })
+      .finally(() => {
+        // Reset profile picture state
+        profilePic.style.opacity = '1';
+        profilePic.style.transform = 'scale(1)';
+        // Reset input for next upload
+        input.value = '';
+      });
+    }
+
+
+    // Face recognition JS removed
+  </script>
+</body>
+</html> 

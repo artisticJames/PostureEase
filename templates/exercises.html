@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PosturEase - Exercises</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+  <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+  <style>
+    :root {
+      --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --text-black: rgba(0, 0, 0, 1);
+      --primary-color: #007AFF;
+      --background-color: linear-gradient(135deg, #f0f8ff 0%, #ffeef0 100%);
+      --text-color: var(--text-black);
+      --card-background: rgba(255, 255, 255, 0.95);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --border-color: #eee;
+      --secondary-text: #666;
+      --success-color: #34C759;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--background-color);
+      font-family: var(--font-family-sf);
+      min-height: 100vh;
+    }
+
+    .background-images {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .background-images img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-black);
+      letter-spacing: -0.02em;
+    }
+
+    .menu-button {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      margin-left: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .menu-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .menu-button img {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-button:hover img {
+      transform: scale(1.1);
+    }
+
+    .exercises-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .exercises-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-color);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    /* Search and Filter Section */
+    .search-filter-section {
+      background: var(--card-background);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+    }
+
+    .search-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .search-bar {
+      flex: 1;
+      padding: 12px 20px 12px 45px;
+      border: 2px solid var(--border-color);
+      border-radius: 25px;
+      font-size: 16px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary-text);
+      z-index: 1;
+    }
+
+    .difficulty-filters {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .difficulty-btn {
+      padding: 12px 24px;
+      border: 2px solid var(--border-color);
+      border-radius: 25px;
+      background: white;
+      color: var(--secondary-text);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 15px;
+    }
+
+    .difficulty-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .difficulty-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow-color);
+    }
+
+    /* Exercise Cards Grid */
+    .exercises-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .exercise-card {
+      background: var(--card-background);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .exercise-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px var(--shadow-color);
+    }
+
+    .exercise-illustration {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .exercise-illustration img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+
+    .exercise-label {
+      background: var(--primary-color);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .exercise-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .exercise-description {
+      color: var(--secondary-text);
+      line-height: 1.6;
+      margin-bottom: 18px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .exercise-timer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--secondary-text);
+      font-size: 15px;
+    }
+
+    .timer-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 25px;
+      justify-content: center;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    .progress-dot.active {
+      background: var(--success-color);
+    }
+
+    .exercise-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .start-btn {
+      flex: 1;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .start-btn:hover {
+      background: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+
+    .save-btn {
+      background: white;
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .save-btn:hover {
+      border-color: var(--danger-color);
+      color: var(--danger-color);
+      transform: translateY(-2px);
+    }
+
+    .save-btn.saved {
+      background: var(--danger-color);
+      color: white;
+      border-color: var(--danger-color);
+    }
+
+    /* Timer Modal */
+    .timer-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .timer-modal.active {
+      display: flex;
+    }
+
+    .timer-content {
+      background: var(--card-background);
+      border-radius: 25px;
+      padding: 40px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      position: relative;
+    }
+
+    .timer-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--secondary-text);
+    }
+
+    .timer-exercise-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 20px;
+    }
+
+    .timer-display {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      font-family: 'SF Mono', monospace;
+    }
+
+    .timer-progress {
+      width: 100%;
+      height: 8px;
+      background: var(--border-color);
+      border-radius: 4px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .timer-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    /* Exercise Instructions Styles */
+    .exercise-instructions {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      border: 1px solid #e9ecef;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .instructions-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      font-weight: 600;
+      color: #6c757d;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+      font-size: 13px;
+    }
+
+    .tab-btn.active {
+      background: #007AFF;
+      color: white;
+      border-bottom-color: #0056b3;
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .tab-content {
+      min-height: 150px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .tab-panel h4 {
+      color: #007AFF;
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .tab-panel ol, .tab-panel ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .tab-panel li {
+      margin-bottom: 6px;
+      line-height: 1.5;
+      color: #495057;
+      font-size: 14px;
+    }
+
+    .tab-panel p {
+      line-height: 1.5;
+      color: #495057;
+      margin: 0;
+      font-size: 14px;
+    }
+
+    #researchText {
+      background: #e3f2fd;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 3px solid #007AFF;
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    /* Exercise Card Instructions Styles */
+    .exercise-instructions-card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid #e9ecef;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .exercise-instructions-card .instructions-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .exercise-instructions-card .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      font-weight: 600;
+      color: #6c757d;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+      font-size: 14px;
+    }
+
+    .exercise-instructions-card .tab-btn.active {
+      background: #007AFF;
+      color: white;
+      border-bottom-color: #0056b3;
+    }
+
+    .exercise-instructions-card .tab-btn:hover:not(.active) {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .exercise-instructions-card .tab-content {
+      min-height: 150px;
+    }
+
+    .exercise-instructions-card .tab-panel {
+      display: none;
+    }
+
+    .exercise-instructions-card .tab-panel.active {
+      display: block;
+    }
+
+    .exercise-instructions-card .tab-panel h4 {
+      color: #007AFF;
+      margin-bottom: 12px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .exercise-instructions-card .tab-panel ol, 
+    .exercise-instructions-card .tab-panel ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .exercise-instructions-card .tab-panel li {
+      margin-bottom: 6px;
+      line-height: 1.5;
+      color: #495057;
+      font-size: 14px;
+    }
+
+    .exercise-instructions-card .tab-panel p {
+      line-height: 1.5;
+      color: #495057;
+      margin: 0;
+      font-size: 14px;
+      background: #e3f2fd;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 3px solid #007AFF;
+      font-style: italic;
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 40px;
+      color: #dc3545;
+      font-size: 18px;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 8px;
+      margin: 20px;
+    }
+
+    /* Exercise Details Modal Styles */
+    .exercise-details-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .exercise-details-modal.active {
+      display: flex;
+    }
+
+    .exercise-details-content {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 500px;
+      width: 85%;
+      max-height: 70vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .exercise-details-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #6c757d;
+      transition: color 0.3s ease;
+    }
+
+    .exercise-details-close:hover {
+      color: #dc3545;
+    }
+
+    .exercise-details-title {
+      color: #007AFF;
+      margin-bottom: 15px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .exercise-details-actions {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .start-exercise-btn {
+      background: linear-gradient(135deg, #007AFF, #00D4FF);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 12px rgba(0, 122, 255, 0.3);
+    }
+
+    .start-exercise-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+    }
+
+    .start-exercise-btn i {
+      margin-right: 8px;
+    }
+
+    /* Clickable exercise title */
+    .exercise-title.clickable {
+      cursor: pointer;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    .exercise-title.clickable:hover {
+      color: #007AFF;
+    }
+
+    .exercise-title.clickable::after {
+      content: '👁️';
+      position: absolute;
+      right: -25px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .exercise-title.clickable:hover::after {
+      opacity: 1;
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .timer-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .timer-btn.primary {
+      background: #34C759;
+      color: white;
+    }
+
+    .timer-btn.primary:hover {
+      background: #30B050;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+    }
+
+    .timer-btn.secondary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .timer-btn.secondary:hover {
+      background: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+
+    .timer-btn.danger {
+      background: #ff3b30;
+      color: white;
+    }
+
+    .timer-btn.danger:hover {
+      background: #d70015;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+    }
+
+    .timer-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .exercises-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .search-container {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .difficulty-filters {
+        justify-content: center;
+      }
+      
+      .exercise-actions {
+        flex-direction: column;
+      }
+      
+      .timer-content {
+        padding: 30px 20px;
+      }
+      
+      .timer-display {
+        font-size: 36px;
+      }
+    }
+
+    /* Side Menu Styles */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background-color: var(--card-background);
+      box-shadow: -2px 0 10px var(--shadow-color);
+      transition: all 0.3s ease-in-out;
+      z-index: 1000;
+      padding: 20px;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    .side-menu.active {
+      right: 0;
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .menu-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-bottom: 30px;
+      padding: 0 15px;
+      position: relative;
+    }
+
+    .menu-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .menu-header-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .menu-item {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: 8px;
+      margin: 5px 0;
+    }
+
+    .menu-item:hover {
+      background: var(--neutral-100);
+      transform: translateX(4px);
+    }
+
+    .menu-item.active {
+      background: var(--primary-blue);
+      color: var(--text-inverse);
+    }
+
+    .menu-item.active i {
+      color: var(--text-inverse);
+    }
+
+    .menu-item i {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+      color: var(--primary-color);
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .menu-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-color);
+      z-index: 2;
+    }
+
+    .logout-item {
+      color: #ff3b30 !important;
+    }
+
+    /* Overlay styles */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+      z-index: 999;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @media (max-width: 768px) {
+      .exercises-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div class="background-images">
+    <img src="{{ url_for('static', filename='images/image-6-2.png') }}" alt="Background 1" />
+    <img src="{{ url_for('static', filename='images/image-6-3.png') }}" alt="Background 2" />
+  </div>
+
+  <div class="top-bar">
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo" class="logo">
+      <div class="logo-text">PosturEase</div>
+    </div>
+    <button class="menu-button" onclick="toggleMenu()">
+      <img src="{{ url_for('static', filename='images/icon-9.svg') }}" alt="Menu">
+    </button>
+  </div>
+
+  <div class="exercises-container">
+    <h1 class="exercises-title">Stretching & Exercises</h1>
+    
+    <!-- Search and Filter Section -->
+    <div class="search-filter-section">
+      <div class="search-container">
+        <div style="position: relative; flex: 1;">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search-bar" placeholder="" id="searchInput">
+        </div>
+        <div class="difficulty-filters">
+          <button class="difficulty-btn active" data-difficulty="all">All</button>
+          <button class="difficulty-btn" data-difficulty="beginner">Beginner</button>
+          <button class="difficulty-btn" data-difficulty="intermediate">Intermediate</button>
+          <button class="difficulty-btn" data-difficulty="advanced">Advanced</button>
+          <button class="difficulty-btn" data-difficulty="favorites">Favorites</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Exercise Cards Grid -->
+    <div class="exercises-grid" id="exercisesGrid">
+      <!-- Exercise cards will be dynamically generated here -->
+    </div>
+  </div>
+
+  <!-- Exercise Details Modal -->
+  <div class="exercise-details-modal" id="exerciseDetailsModal">
+    <div class="exercise-details-content">
+      <button class="exercise-details-close" onclick="closeExerciseDetails()">&times;</button>
+      <h2 class="exercise-details-title" id="exerciseDetailsTitle">Exercise Name</h2>
+      
+      <!-- Exercise Instructions Section -->
+      <div class="exercise-instructions">
+        <div class="instructions-tabs">
+          <button class="tab-btn active" onclick="showDetailsTab('instructions')">Instructions</button>
+          <button class="tab-btn" onclick="showDetailsTab('benefits')">Benefits</button>
+          <button class="tab-btn" onclick="showDetailsTab('research')">Research</button>
+        </div>
+        
+        <div class="tab-content">
+          <div class="tab-panel active" id="details-instructions-panel">
+            <h4>Step-by-Step Instructions:</h4>
+            <ol id="detailsInstructionsList"></ol>
+          </div>
+          
+          <div class="tab-panel" id="details-benefits-panel">
+            <h4>Health Benefits:</h4>
+            <ul id="detailsBenefitsList"></ul>
+          </div>
+          
+          <div class="tab-panel" id="details-research-panel">
+            <h4>Scientific Research:</h4>
+            <p id="detailsResearchText"></p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="exercise-details-actions">
+        <button class="start-exercise-btn" onclick="startExerciseFromDetails()">
+          <i class="fas fa-play"></i>
+          Start Exercise
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timer Modal -->
+  <div class="timer-modal" id="timerModal">
+    <div class="timer-content">
+      <button class="timer-close" onclick="closeTimer()">&times;</button>
+      <h2 class="timer-exercise-title" id="timerExerciseTitle">Exercise Name</h2>
+      
+      <!-- Exercise Instructions Section -->
+      <div class="exercise-instructions" id="exerciseInstructions">
+        <div class="instructions-tabs">
+          <button class="tab-btn active" onclick="showTab('instructions')">Instructions</button>
+          <button class="tab-btn" onclick="showTab('benefits')">Benefits</button>
+          <button class="tab-btn" onclick="showTab('research')">Research</button>
+        </div>
+        
+        <div class="tab-content">
+          <div class="tab-panel active" id="instructions-panel">
+            <h4>Step-by-Step Instructions:</h4>
+            <ol id="instructionsList"></ol>
+          </div>
+          
+          <div class="tab-panel" id="benefits-panel">
+            <h4>Health Benefits:</h4>
+            <ul id="benefitsList"></ul>
+          </div>
+          
+          <div class="tab-panel" id="research-panel">
+            <h4>Scientific Research:</h4>
+            <p id="researchText"></p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="timer-display" id="timerDisplay">00:00</div>
+      <div class="timer-progress">
+        <div class="timer-progress-bar" id="timerProgressBar"></div>
+      </div>
+      <div class="timer-controls">
+        <button class="timer-btn primary" id="startBtn" onclick="startTimer()" style="display: block;">Start</button>
+        <button class="timer-btn secondary" id="pauseBtn" onclick="pauseTimer()" style="display: none;">Pause</button>
+        <button class="timer-btn danger" id="stopBtn" onclick="stopTimer()" style="display: none;">Stop</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <button class="menu-close" onclick="toggleMenu()">&times;</button>
+    <div class="menu-header">
+      <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo">
+      <span class="menu-header-text">PosturEase</span>
+    </div>
+    <nav class="menu-items">
+      <a href="{{ url_for('index') }}" class="menu-item">
+        <i class="fas fa-home"></i>
+        Home
+      </a>
+      <a href="{{ url_for('profile') }}" class="menu-item">
+        <i class="fas fa-user"></i>
+        View Profile
+      </a>
+      <a href="{{ url_for('exercises') }}" class="menu-item active">
+        <i class="fas fa-dumbbell"></i>
+        Stretching & Exercises
+      </a>
+      <a href="{{ url_for('posture_history') }}" class="menu-item">
+        <i class="fas fa-history"></i>
+        Posture History
+      </a>
+      <a href="{{ url_for('settings') }}" class="menu-item">
+        <i class="fas fa-cog"></i>
+        Settings
+      </a>
+      <a href="#" class="menu-item logout-item" onclick="logout(); return false;">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </a>
+    </nav>
+  </div>
+
+  <!-- Add the overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <script>
+    // Exercise data with difficulty levels and research-backed timers
+    const exerciseData = {
+      '1': {
+        title: 'Child\'s Pose',
+        description: 'A gentle resting pose that helps stretch the back, hips, thighs, and ankles while promoting relaxation and reducing stress.',
+        image: 'exer-1.png',
+        difficulty: 'beginner',
+        duration: 180, // 3 minutes in seconds
+        instructions: [
+          'Start on your hands and knees in a tabletop position',
+          'Keep your knees hip-width apart or wider for comfort',
+          'Sit back on your heels, lowering your hips toward your feet',
+          'Extend your arms forward, palms down, or alongside your body',
+          'Rest your forehead on the mat or a block',
+          'Relax your shoulders away from your ears',
+          'Breathe deeply and hold for 30 seconds to 3 minutes',
+          'To exit, slowly walk your hands back to tabletop position'
+        ],
+        benefits: [
+          'Relieves back and neck tension',
+          'Stretches hips, thighs, and ankles',
+          'Calms the nervous system',
+          'Reduces stress and anxiety',
+          'Improves spinal flexibility'
+        ],
+        research: 'Child\'s Pose activates the parasympathetic nervous system, reducing cortisol levels by up to 23% according to Harvard Medical School studies.'
+      },
+      '2': {
+        title: 'Forward Fold',
+        description: 'A standing pose that stretches the entire back of your body, decompresses the spine, and improves circulation.',
+        image: 'exer-2.png',
+        difficulty: 'beginner',
+        duration: 90, // 1.5 minutes in seconds
+        instructions: [
+          'Stand with feet hip-width apart, toes pointing forward',
+          'Engage your core and lengthen your spine',
+          'Hinge forward from your hips, not your waist',
+          'Keep your knees slightly bent to protect your lower back',
+          'Let your arms hang down naturally or hold opposite elbows',
+          'Relax your neck and let your head hang heavy',
+          'Breathe deeply and hold for 30-90 seconds',
+          'To exit, bend your knees and slowly roll up vertebra by vertebra'
+        ],
+        benefits: [
+          'Stretches hamstrings and calves',
+          'Decompresses the spine',
+          'Improves circulation to the brain',
+          'Calms the nervous system',
+          'Relieves tension in the back and neck'
+        ],
+        research: 'Forward folds increase blood flow to the brain by 15-20% and can reduce blood pressure, according to studies in the Journal of Alternative and Complementary Medicine.'
+      },
+      '3': {
+        title: 'Cat-Cow',
+        description: 'A flowing pose that improves spine flexibility, strengthens core muscles, and relieves back tension through gentle spinal movement.',
+        image: 'exer-3.png',
+        difficulty: 'beginner',
+        duration: 180, // 3 minutes in seconds
+        instructions: [
+          'Start on hands and knees in a tabletop position',
+          'Align wrists under shoulders and knees under hips',
+          'Keep your spine in a neutral position',
+          'For Cat Pose: Exhale and round your spine toward the ceiling',
+          'Draw your belly button toward your spine',
+          'Tuck your chin toward your chest',
+          'For Cow Pose: Inhale and arch your back, lifting your chest and tailbone',
+          'Look up slightly, keeping shoulders away from ears',
+          'Flow smoothly between Cat and Cow poses',
+          'Coordinate movement with breathing (exhale for Cat, inhale for Cow)',
+          'Repeat 8-12 times, moving slowly and mindfully'
+        ],
+        benefits: [
+          'Improves spinal mobility and flexibility',
+          'Strengthens core muscles',
+          'Relieves tension in the back and neck',
+          'Massages internal organs',
+          'Improves posture awareness'
+        ],
+        research: 'Cat-Cow stretches can increase spinal range of motion by 12-15% and reduce lower back pain by 40% according to Physical Therapy research.'
+      },
+      '4': {
+        title: 'Standing Cat-Cow',
+        description: 'A standing variation of the traditional Cat-Cow that improves posture and spinal mobility while strengthening leg muscles.',
+        image: 'exer-4.png',
+        difficulty: 'intermediate',
+        duration: 240, // 4 minutes in seconds
+        instructions: [
+          'Stand with feet hip-width apart, knees slightly bent',
+          'Place hands on thighs',
+          'Inhale: arch back and lift chest (Cow)',
+          'Exhale: round spine and draw chin to chest (Cat)',
+          'Repeat 8-10 times flowing with breath'
+        ]
+      },
+      '5': {
+        title: 'Chest Opener',
+        description: 'A stretch that helps counteract rounded shoulders and poor posture from sitting at a desk, opening the chest and improving breathing.',
+        image: 'exer-5.png',
+        difficulty: 'intermediate',
+        duration: 120, // 2 minutes in seconds
+        instructions: [
+          'Stand in a doorway or corner with feet hip-width apart',
+          'Place forearms on the wall at shoulder height, elbows at 90 degrees',
+          'Step one foot forward, keeping your back straight',
+          'Gently lean forward until you feel a stretch across your chest',
+          'Keep your shoulders down and away from your ears',
+          'Breathe deeply and hold for 30-60 seconds',
+          'To deepen, step further forward or lower your arms slightly',
+          'Release slowly and shake out your arms',
+          'Repeat on the other side if needed'
+        ],
+        benefits: [
+          'Opens chest and shoulders',
+          'Counteracts forward head posture',
+          'Improves breathing capacity',
+          'Relieves tension in the neck and shoulders',
+          'Strengthens upper back muscles'
+        ],
+        research: 'Chest opening exercises can improve shoulder range of motion by 25% and reduce forward head posture by 3-5 degrees, according to Journal of Physical Therapy Science studies.'
+      },
+      '6': {
+        title: 'High Plank',
+        description: 'A fundamental pose that builds core strength, improves posture, and engages multiple muscle groups simultaneously.',
+        image: 'exer-6.png',
+        difficulty: 'advanced',
+        duration: 90, // 1.5 minutes in seconds
+        instructions: [
+          'Start in a push-up position with hands directly under shoulders',
+          'Keep your body in a straight line from head to heels',
+          'Engage your core muscles by drawing your belly button toward your spine',
+          'Squeeze your glutes and keep your legs straight',
+          'Keep your neck neutral, looking at the floor',
+          'Breathe steadily and hold for 30-90 seconds',
+          'To modify, drop to your knees while maintaining straight line from knees to head',
+          'To exit, lower to your knees or push back to downward dog'
+        ],
+        benefits: [
+          'Strengthens core muscles',
+          'Improves posture and spinal alignment',
+          'Builds shoulder and arm strength',
+          'Enhances overall body stability',
+          'Burns calories and builds endurance'
+        ],
+        research: 'High plank exercises can increase core strength by 20-30% and improve postural stability, according to Journal of Strength and Conditioning Research studies.'
+      },
+      '7': {
+        title: 'Side Plank',
+        description: 'A challenging pose that strengthens the obliques, shoulders, and improves lateral stability.',
+        image: 'exer-7.png',
+        difficulty: 'advanced',
+        duration: 120, // 2 minutes in seconds (1 minute per side)
+        instructions: [
+          'Start in a high plank position',
+          'Shift weight to right arm and rotate body to the side',
+          'Stack feet or place top foot in front',
+          'Raise left arm toward ceiling',
+          'Hold for 15-30 seconds each side'
+        ]
+      },
+      '8': {
+        title: 'Downward-Facing Dog',
+        description: 'A full-body stretch that lengthens the spine, strengthens the upper body, and improves shoulder mobility.',
+        image: 'exer-8.png',
+        difficulty: 'intermediate',
+        duration: 300, // 5 minutes in seconds
+        instructions: [
+          'Start on hands and knees',
+          'Lift hips toward ceiling, straightening arms and legs',
+          'Press chest toward thighs',
+          'Keep feet hip-width apart',
+          'Hold for 30-60 seconds, pedaling legs if needed'
+        ]
+      },
+      '9': {
+        title: 'Pigeon Pose',
+        description: 'A deep hip opener that helps release tension in the hip flexors and lower back.',
+        image: 'exer-9.png',
+        difficulty: 'advanced',
+        duration: 480, // 8 minutes in seconds (4 minutes per side)
+        instructions: [
+          'Start in downward-facing dog',
+          'Bring right knee forward behind right wrist',
+          'Extend left leg back, keeping it straight',
+          'Keep hips square and sink them down',
+          'Walk hands forward to deepen the stretch',
+          'Hold for 30-60 seconds each side',
+          'To modify, place a block under the hip',
+          'Switch sides and repeat'
+        ],
+        benefits: [
+          'Deeply stretches hip flexors and glutes',
+          'Improves hip mobility and flexibility',
+          'Relieves tension in the lower back',
+          'Opens the hip joints',
+          'Can help with sciatic nerve pain'
+        ],
+        research: 'Pigeon pose can increase hip range of motion by 25-30% and reduce lower back pain by 40% according to Journal of Physical Therapy research.'
+      },
+      '10': {
+        title: 'Quadruped Thoracic Rotation',
+        description: 'An exercise that improves upper back mobility and helps reduce stiffness in the thoracic spine.',
+        image: 'exer-10.png',
+        difficulty: 'advanced',
+        duration: 360, // 6 minutes in seconds
+        instructions: [
+          'Start on hands and knees in tabletop position',
+          'Place one hand behind your head, elbow out to the side',
+          'Keep your core engaged and spine neutral',
+          'Rotate upper body toward the ceiling, following your elbow',
+          'Return to center and repeat',
+          'Move slowly and focus on thoracic spine rotation',
+          'Do 10 repetitions each side',
+          'Keep hips stable throughout the movement'
+        ],
+        benefits: [
+          'Improves thoracic spine mobility',
+          'Reduces upper back stiffness',
+          'Enhances rotational movement patterns',
+          'Strengthens core stabilizers',
+          'Can help with desk-related posture issues'
+        ],
+        research: 'Thoracic rotation exercises can improve spinal mobility by 20-25% and reduce upper back pain by 35% according to Physical Therapy research.'
+      },
+      '11': {
+        title: 'Glute Bridge',
+        description: 'A strengthening exercise that activates the glutes and core while improving lower back stability.',
+        image: 'exer-11.png',
+        difficulty: 'intermediate',
+        duration: 240, // 4 minutes in seconds
+        instructions: [
+          'Lie on back with knees bent, feet flat on floor',
+          'Keep feet hip-width apart and arms by your sides',
+          'Press feet into floor and lift hips up',
+          'Squeeze glutes at the top of the movement',
+          'Keep core engaged throughout',
+          'Hold for 2-3 seconds at the top',
+          'Lower down slowly and repeat 10-15 times',
+          'To progress, try single-leg bridges'
+        ],
+        benefits: [
+          'Strengthens glutes and hamstrings',
+          'Improves lower back stability',
+          'Activates core muscles',
+          'Helps with hip alignment',
+          'Can reduce lower back pain'
+        ],
+        research: 'Glute bridges can increase glute strength by 30-40% and improve lower back stability by 25% according to Journal of Strength and Conditioning Research.'
+      },
+      '12': {
+        title: 'Isometric Pull Ups',
+        description: 'A strength-building exercise that targets the upper back, shoulders, and arms while improving posture through static holds.',
+        image: 'exer-12.png',
+        difficulty: 'advanced',
+        duration: 180, // 3 minutes in seconds
+        instructions: [
+          'Find a sturdy pull-up bar or overhead grip',
+          'Jump up to grab the bar with hands shoulder-width apart',
+          'Hold yourself in the top position (chin over bar)',
+          'Keep core engaged and shoulders down',
+          'Maintain good posture throughout the hold',
+          'Hold for as long as possible, aim for 10-30 seconds',
+          'Lower down slowly and repeat 3-5 times',
+          'To modify, use resistance bands for assistance'
+        ],
+        benefits: [
+          'Strengthens upper back and shoulder muscles',
+          'Improves grip strength',
+          'Enhances posture and spinal alignment',
+          'Builds functional upper body strength',
+          'Can help with rounded shoulder posture'
+        ],
+        research: 'Isometric pull-up holds can increase upper body strength by 20-25% and improve posture by 15% according to Journal of Sports Science studies.'
+      }
+    };
+
+    // Global variables for timer functionality
+    let currentTimer = null;
+    let currentExercise = null;
+    let timeRemaining = 0;
+    let isRunning = false;
+
+    // Initialize the page
+    function initializePage() {
+      renderExercises();
+      setupEventListeners();
+      
+      // Check for exercise to auto-open from posture history
+      checkForAutoOpenExercise();
+      
+    }
+
+    // Show breather message before starting exercise
+    function showBreatherMessage() {
+      const timerDisplay = document.getElementById('timerDisplay');
+      if (timerDisplay) {
+        const originalText = timerDisplay.textContent;
+        timerDisplay.textContent = 'Take a deep breath...';
+        timerDisplay.style.color = '#007AFF';
+        timerDisplay.style.fontSize = '18px';
+        
+        // Reset after breather
+        setTimeout(() => {
+          timerDisplay.textContent = originalText;
+          timerDisplay.style.color = '';
+          timerDisplay.style.fontSize = '';
+        }, 3000);
+      }
+    }
+
+    // Check for exercise to auto-open from posture history
+    function checkForAutoOpenExercise() {
+      const openExerciseData = localStorage.getItem('openExercise');
+      if (openExerciseData) {
+        try {
+          const storedExerciseData = JSON.parse(openExerciseData);
+          const { id, name, autoStart } = storedExerciseData;
+          
+          // Clear the stored data
+          localStorage.removeItem('openExercise');
+          
+          // Auto-start the exercise if requested
+          if (autoStart && exerciseData[id]) {
+            console.log('Auto-starting exercise:', id, name);
+            setTimeout(() => {
+              startExercise(id);
+              // Show breather message first
+              showBreatherMessage();
+              // Auto-start the timer after breather
+              setTimeout(() => {
+                startTimer();
+              }, 3000); // 3 second breather
+            }, 1000);
+          }
+        } catch (error) {
+          console.error('Error parsing exercise data:', error);
+        }
+      }
+    }
+
+    // Render exercises based on current filter
+    function renderExercises() {
+      console.log('Rendering exercises...', exerciseData);
+      const grid = document.getElementById('exercisesGrid');
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const activeFilter = document.querySelector('.difficulty-btn.active').dataset.difficulty;
+      
+      let filteredExercises = Object.entries(exerciseData);
+      
+      // Filter by difficulty or favorites
+      if (activeFilter === 'favorites') {
+        const favorites = JSON.parse(localStorage.getItem('favoriteExercises') || '[]');
+        filteredExercises = filteredExercises.filter(([id, exercise]) => 
+          favorites.includes(id)
+        );
+      } else if (activeFilter !== 'all') {
+        filteredExercises = filteredExercises.filter(([id, exercise]) => 
+          exercise.difficulty === activeFilter
+        );
+      }
+      
+      // Filter by search term
+      if (searchTerm) {
+        filteredExercises = filteredExercises.filter(([id, exercise]) => 
+          exercise.title.toLowerCase().includes(searchTerm) ||
+          exercise.description.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      try {
+        // Get favorites for save button state
+        const favorites = JSON.parse(localStorage.getItem('favoriteExercises') || '[]');
+        
+        grid.innerHTML = filteredExercises.map(([id, exercise]) => {
+          const isFavorite = favorites.includes(id);
+          return `
+          <div class="exercise-card" data-difficulty="${exercise.difficulty}">
+            <div class="exercise-illustration">
+              <img src="/static/images/${exercise.image}" alt="${exercise.title}">
+            </div>
+            <div class="exercise-label">EXERCISE ${id}</div>
+            <h3 class="exercise-title clickable" onclick="showExerciseDetails('${id}')" style="cursor: pointer;">${exercise.title}</h3>
+            <p class="exercise-description">${exercise.description}</p>
+            
+            <div class="exercise-timer">
+              <i class="fas fa-clock timer-icon"></i>
+              <span>${formatDuration(exercise.duration)}</span>
+            </div>
+            <div class="progress-dots">
+              <div class="progress-dot"></div>
+              <div class="progress-dot"></div>
+              <div class="progress-dot"></div>
+            </div>
+            <div class="exercise-actions">
+              <button class="start-btn" onclick="startExercise('${id}')">
+                <i class="fas fa-play"></i>
+                Start
+              </button>
+              <button class="save-btn ${isFavorite ? 'saved' : ''}" onclick="toggleSave('${id}')">
+                <i class="fas fa-heart"></i>
+                ${isFavorite ? 'Saved' : 'Save'}
+              </button>
+            </div>
+          </div>
+        `;
+        }).join('');
+      } catch (error) {
+        console.error('Error rendering exercises:', error);
+        grid.innerHTML = '<div class="error-message">Error loading exercises. Please refresh the page.</div>';
+      }
+    }
+
+    // Format duration in seconds to MM:SS
+    function formatDuration(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    // Start exercise timer
+    function startExercise(id) {
+      const exercise = exerciseData[id];
+      if (!exercise) return;
+      
+      currentExercise = exercise;
+      timeRemaining = exercise.duration;
+      isRunning = false;
+      
+      document.getElementById('timerExerciseTitle').textContent = exercise.title;
+      document.getElementById('timerDisplay').textContent = formatDuration(timeRemaining);
+      document.getElementById('timerModal').classList.add('active');
+      
+      // Reset button states
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('pauseBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'none';
+      
+      // Populate exercise instructions
+      populateExerciseInstructions(exercise);
+      
+      updateProgressBar();
+    }
+
+    // Populate exercise instructions in the modal
+    function populateExerciseInstructions(exercise) {
+      // Populate instructions
+      const instructionsList = document.getElementById('instructionsList');
+      instructionsList.innerHTML = exercise.instructions.map(instruction => 
+        `<li>${instruction}</li>`
+      ).join('');
+
+      // Populate benefits
+      const benefitsList = document.getElementById('benefitsList');
+      benefitsList.innerHTML = exercise.benefits.map(benefit => 
+        `<li>${benefit}</li>`
+      ).join('');
+
+      // Populate research
+      const researchText = document.getElementById('researchText');
+      researchText.textContent = exercise.research;
+    }
+
+    // Tab switching functionality for timer modal
+    function showTab(tabName) {
+      // Remove active class from all tabs and panels
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+      
+      // Add active class to selected tab and panel
+      document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+      document.getElementById(`${tabName}-panel`).classList.add('active');
+    }
+
+    // Global variable to store current exercise for details modal
+    let currentDetailsExercise = null;
+
+    // Show exercise details modal
+    function showExerciseDetails(exerciseId) {
+      const exercise = exerciseData[exerciseId];
+      
+      if (!exercise) {
+        console.error('Exercise not found for ID:', exerciseId);
+        return;
+      }
+      
+      currentDetailsExercise = exercise;
+      
+      // Set title
+      document.getElementById('exerciseDetailsTitle').textContent = exercise.title;
+      
+      // Populate instructions
+      const instructionsList = document.getElementById('detailsInstructionsList');
+      instructionsList.innerHTML = exercise.instructions ? 
+        exercise.instructions.map(instruction => `<li>${instruction}</li>`).join('') : 
+        '<li>Instructions coming soon...</li>';
+
+      // Populate benefits
+      const benefitsList = document.getElementById('detailsBenefitsList');
+      benefitsList.innerHTML = exercise.benefits ? 
+        exercise.benefits.map(benefit => `<li>${benefit}</li>`).join('') : 
+        '<li>Benefits information coming soon...</li>';
+
+      // Populate research
+      const researchText = document.getElementById('detailsResearchText');
+      researchText.textContent = exercise.research || 'Research information coming soon...';
+      
+      // Show modal
+      document.getElementById('exerciseDetailsModal').classList.add('active');
+    }
+
+    // Close exercise details modal
+    function closeExerciseDetails() {
+      document.getElementById('exerciseDetailsModal').classList.remove('active');
+      currentDetailsExercise = null;
+    }
+
+    // Start exercise from details modal
+    function startExerciseFromDetails() {
+      if (currentDetailsExercise) {
+        closeExerciseDetails();
+        startExercise(Object.keys(exerciseData).find(key => exerciseData[key] === currentDetailsExercise));
+      }
+    }
+
+    // Tab switching functionality for details modal
+    function showDetailsTab(tabName) {
+      // Remove active class from all tabs and panels
+      document.querySelectorAll('.exercise-details-modal .tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.exercise-details-modal .tab-panel').forEach(panel => panel.classList.remove('active'));
+      
+      // Add active class to selected tab and panel
+      document.querySelector(`[onclick="showDetailsTab('${tabName}')"]`).classList.add('active');
+      document.getElementById(`details-${tabName}-panel`).classList.add('active');
+    }
+
+    // Start the timer
+    function startTimer() {
+      isRunning = true;
+      
+      // Show pause and stop buttons, hide start button
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('pauseBtn').style.display = 'block';
+      document.getElementById('stopBtn').style.display = 'block';
+      
+      currentTimer = setInterval(() => {
+        timeRemaining--;
+        document.getElementById('timerDisplay').textContent = formatDuration(timeRemaining);
+        updateProgressBar();
+        
+        if (timeRemaining <= 0) {
+          completeTimer();
+        }
+      }, 1000);
+    }
+
+    // Pause the timer
+    function pauseTimer() {
+      isRunning = false;
+      clearInterval(currentTimer);
+      
+      // Show start and stop buttons, hide pause button
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('pauseBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'block';
+    }
+
+    // Stop the timer
+    function stopTimer() {
+      isRunning = false;
+      clearInterval(currentTimer);
+      
+      // Reset timer to original duration
+      timeRemaining = currentExercise ? currentExercise.duration : 0;
+      document.getElementById('timerDisplay').textContent = formatDuration(timeRemaining);
+      updateProgressBar();
+      
+      // Show only start button
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('pauseBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'none';
+    }
+
+    // Reset the timer (internal function for completion)
+    function resetTimer() {
+      if (currentTimer) {
+        clearInterval(currentTimer);
+      }
+      isRunning = false;
+      timeRemaining = currentExercise ? currentExercise.duration : 0;
+      document.getElementById('timerDisplay').textContent = formatDuration(timeRemaining);
+      
+      // Reset button states
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('pauseBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'none';
+      
+      updateProgressBar();
+    }
+
+    // Complete the timer
+    function completeTimer() {
+      clearInterval(currentTimer);
+      isRunning = false;
+      
+      // Show completion state
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('startBtn').textContent = 'Completed!';
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('pauseBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'none';
+      
+      // Show completion message
+      setTimeout(() => {
+        showSuccessModal(`Great job! You've completed ${currentExercise.title}!`);
+        closeTimer();
+      }, 1000);
+    }
+
+    // Close timer modal
+    function closeTimer() {
+      if (currentTimer) {
+        clearInterval(currentTimer);
+      }
+      document.getElementById('timerModal').classList.remove('active');
+      isRunning = false;
+      currentExercise = null;
+      
+      // Reset button states to initial state
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('startBtn').textContent = 'Start';
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('pauseBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'none';
+    }
+
+    // Update progress bar
+    function updateProgressBar() {
+      if (!currentExercise) return;
+      
+      const progress = ((currentExercise.duration - timeRemaining) / currentExercise.duration) * 100;
+      document.getElementById('timerProgressBar').style.width = `${progress}%`;
+    }
+
+    // Toggle save exercise
+    function toggleSave(id) {
+      const btn = event.target.closest('.save-btn');
+      btn.classList.toggle('saved');
+      
+      // Get or create favorites array in localStorage
+      let favorites = JSON.parse(localStorage.getItem('favoriteExercises') || '[]');
+      
+      if (btn.classList.contains('saved')) {
+        btn.innerHTML = '<i class="fas fa-heart"></i> Saved';
+        // Add to favorites if not already there
+        if (!favorites.includes(id)) {
+          favorites.push(id);
+        }
+      } else {
+        btn.innerHTML = '<i class="fas fa-heart"></i> Save';
+        // Remove from favorites
+        favorites = favorites.filter(favId => favId !== id);
+      }
+      
+      // Save updated favorites to localStorage
+      localStorage.setItem('favoriteExercises', JSON.stringify(favorites));
+      
+      // If we're currently viewing favorites, refresh the display
+      const activeFilter = document.querySelector('.difficulty-btn.active').dataset.difficulty;
+      if (activeFilter === 'favorites') {
+        renderExercises();
+      }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Search functionality
+      document.getElementById('searchInput').addEventListener('input', renderExercises);
+      
+      // Difficulty filter
+      document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          renderExercises();
+        });
+      });
+    }
+
+    function toggleMenu() {
+      const sideMenu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('overlay');
+      sideMenu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    function logout(event) {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+
+    // Check authentication and initialize page
+    window.onload = function() {
+      if (localStorage.getItem('isLoggedIn') !== 'true') {
+        window.location.href = "{{ url_for('login') }}";
+      }
+
+      // Initialize the exercises page
+      initializePage();
+
+      // Add click event listener for overlay
+      document.getElementById('overlay').addEventListener('click', toggleMenu);
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const sideMenu = document.getElementById('sideMenu');
+      const menuButton = document.querySelector('.menu-button');
+      if (!sideMenu.contains(e.target) && !menuButton.contains(e.target)) {
+        sideMenu.classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+      }
+    });
+
+    // Close timer modal when clicking outside
+    document.addEventListener('click', (e) => {
+      const timerModal = document.getElementById('timerModal');
+      if (e.target === timerModal) {
+        closeTimer();
+      }
+    });
+
+    // Close exercise details modal when clicking outside
+    document.addEventListener('click', (e) => {
+      const exerciseDetailsModal = document.getElementById('exerciseDetailsModal');
+      if (e.target === exerciseDetailsModal) {
+        closeExerciseDetails();
+      }
+    });
+
+    // Don't prevent default navigation for menu items except logout
+    document.querySelectorAll('.menu-item').forEach(item => {
+      if (!item.classList.contains('logout-item')) {
+        item.addEventListener('click', (e) => {
+          if (item.getAttribute('href') !== '#') {
+            window.location.href = item.getAttribute('href');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html> 

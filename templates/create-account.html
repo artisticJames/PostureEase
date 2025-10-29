@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PosturEase - Create Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+  <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+  <style>
+    :root {
+      --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --text-black: rgba(0, 0, 0, 1);
+      --primary-color: #007AFF;
+      --primary-hover: #0056b3;
+      --background-color: #e8fefb;
+      --card-background: rgba(255, 255, 255, 0.9);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --text-color: var(--text-black);
+      --border-color: #ddd;
+      --input-background: white;
+      --secondary-text: #666;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      font-family: var(--font-family-sf);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .background-images {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .background-images img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .create-account-container {
+      background: var(--card-background);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 10px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: var(--font-family-sf);
+      font-size: 16px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.3s;
+      margin-bottom: 15px;
+      background-color: var(--input-background);
+      color: var(--text-color);
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .input-row > * {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    /* Custom select styling */
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 1em;
+      padding-right: 40px;
+    }
+
+    /* Birthday field container */
+    .birthday-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .birthday-container select {
+      flex: 1;
+    }
+
+    .create-button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 0;
+      border-radius: 8px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-bottom: 10px;
+    }
+
+    .create-button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .terms-text {
+      font-size: 12px;
+      color: var(--secondary-text);
+      margin: 15px 0;
+      line-height: 1.4;
+    }
+
+    .terms-text a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .login-link {
+      margin-top: 20px;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-size: 14px;
+      display: block;
+    }
+
+    .error-message {
+      color: #ff3b30;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .success-message {
+      color: #34c759;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .password-requirements {
+      font-size: 12px;
+      color: var(--secondary-text);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-images">
+    <img src="{{ url_for('static', filename='images/image-6-2.png') }}" alt="Background 1" />
+    <img src="{{ url_for('static', filename='images/image-6-3.png') }}" alt="Background 2" />
+  </div>
+
+  <div class="create-account-container">
+    <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo" class="logo">
+    <div class="logo-text">PosturEase</div>
+    <h1 class="title">Create Account</h1>
+    
+    <form id="createAccountForm" onsubmit="return handleCreateAccount(event)">
+      <div class="input-group">
+        <div class="input-row">
+          <input type="text" id="firstName" placeholder="First Name" required>
+          <input type="text" id="lastName" placeholder="Last Name" required>
+        </div>
+        
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="text" id="username" placeholder="Username" required>
+        
+        <div class="birthday-container">
+          <select id="birthMonth" required>
+            <option value="" disabled selected>Month</option>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+          <select id="birthDay" required>
+            <option value="" disabled selected>Day</option>
+          </select>
+          <select id="birthYear" required>
+            <option value="" disabled selected>Year</option>
+          </select>
+        </div>
+
+        <select id="gender" required>
+          <option value="" disabled selected>Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+          <option value="prefer-not">Prefer not to say</option>
+        </select>
+
+        <input type="password" id="password" placeholder="Password" required>
+        <div class="password-requirements">
+          Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.
+        </div>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+      </div>
+
+      <div class="terms-text">
+        By creating an account, you agree to our <a href="#">Terms & Service</a> and <a href="#">Privacy Policy</a>
+      </div>
+      
+      <button type="submit" class="create-button">Create Account</button>
+      
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+    </form>
+
+    <a href="{{ url_for('login') }}" class="login-link">Already have an account? Login</a>
+    
+    <!-- Post-create success panel -->
+    <div id="postCreateSuccess" style="display:none; text-align:left; margin-top:16px; background:#ffffffcc; padding:16px; border-radius:12px;">
+      <div style="font-weight:600; font-size:18px; margin-bottom:8px;">Check your email</div>
+      <div style="font-size:14px; color:#333; line-height:1.5;">
+        We sent a verification code to your email. Enter it below to verify your account.
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+        <input id="verifyCodeInput" type="text" placeholder="Enter code" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;" />
+        <button id="submitVerifyCodeBtn" class="create-button" style="width:auto; padding:12px 16px;">Verify</button>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+        <button id="resendCodeBtn" class="create-button" style="width:auto; padding:8px 12px; background-color:#666; font-size:14px;">Resend Code</button>
+        <button id="goToLoginBtn" class="create-button" style="width:auto; padding:8px 12px; background-color:#666; font-size:14px;">Go to Login</button>
+      </div>
+      <div id="resendMessage" style="font-size:12px; color:#34c759; margin-top:8px; display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    // EmailJS browser SDK
+    (function(){
+      var s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+      s.async=true;
+      s.onload=function(){ try{ emailjs.init('ngGZSdqeiXKAmlQJM'); }catch(e){} };
+      document.head.appendChild(s);
+    })();
+    // Generate days for the birth day select
+    function generateDays(month, year) {
+      const daysSelect = document.getElementById('birthDay');
+      const selectedDay = daysSelect.value;
+      daysSelect.innerHTML = '<option value="" disabled selected>Day</option>';
+      
+      let daysInMonth = 31;
+      if (month) {
+        if (month === '02') {
+          daysInMonth = year && isLeapYear(year) ? 29 : 28;
+        } else if (['04', '06', '09', '11'].includes(month)) {
+          daysInMonth = 30;
+        }
+      }
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const day = i.toString().padStart(2, '0');
+        const option = document.createElement('option');
+        option.value = day;
+        option.textContent = i;
+        if (day === selectedDay) {
+          option.selected = true;
+        }
+        daysSelect.appendChild(option);
+      }
+    }
+
+    // Generate years for the birth year select (100 years back from current year)
+    function generateYears() {
+      const yearSelect = document.getElementById('birthYear');
+      const currentYear = new Date().getFullYear();
+      const startYear = currentYear - 100;
+      
+      for (let year = currentYear; year >= startYear; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+      }
+    }
+
+    // Check if year is leap year
+    function isLeapYear(year) {
+      return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    }
+
+    // Initialize date selects
+    generateYears();
+    generateDays();
+
+    // Update days when month or year changes
+    document.getElementById('birthMonth').addEventListener('change', function() {
+      generateDays(this.value, document.getElementById('birthYear').value);
+    });
+
+    document.getElementById('birthYear').addEventListener('change', function() {
+      generateDays(document.getElementById('birthMonth').value, this.value);
+    });
+
+    function handleCreateAccount(event) {
+      event.preventDefault();
+      
+      const formData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+        birthMonth: document.getElementById('birthMonth').value,
+        birthDay: document.getElementById('birthDay').value,
+        birthYear: document.getElementById('birthYear').value,
+        gender: document.getElementById('gender').value
+      };
+
+      fetch('/create-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Create account response:', data);
+        const postCreatePanel = document.getElementById('postCreateSuccess');
+        const formEl = document.getElementById('createAccountForm');
+        const goToLoginBtn = document.getElementById('goToLoginBtn');
+        goToLoginBtn.onclick = function(){ window.location.href = "{{ url_for('login') }}"; };
+
+        if (data.success) {
+          // Redirect to OTP verification page
+          if (data.redirect_url) {
+            window.location.href = data.redirect_url;
+          } else if (data.redirect) {
+            window.location.href = data.redirect;
+          } else {
+            // Fallback to inline verification if no redirect URL
+            formEl.style.display = 'none';
+            postCreatePanel.style.display = 'block';
+            const verifyBtn = document.getElementById('submitVerifyCodeBtn');
+            const resendBtn = document.getElementById('resendCodeBtn');
+            verifyBtn.onclick = function(){ submitVerifyCode(data.token); };
+            resendBtn.onclick = function(){ resendVerificationCode(data.email, data.username, data.token); };
+          }
+        } else {
+          // Show error message
+          const errorMessage = document.querySelector('.error-message');
+          const detail = data && data.detail ? `\nDetail: ${data.detail}` : '';
+          errorMessage.textContent = (data.message || 'An error occurred during account creation.') + detail;
+          errorMessage.style.display = 'block';
+          // Attempt client-side send if server failed but provided token
+          try {
+            if (window.emailjs && data.token && data.email && data.username) {
+              const params = {
+                to_email: data.email,
+                to_name: data.username,
+                username: data.username,
+                base_url: data.base_url || window.location.origin,
+                token: data.token,
+                logo_url: (data.base_url || window.location.origin) + '/static/images/logo-test-2-1-10.png',
+                support_email: 'postureeasee@gmail.com',
+                year: new Date().getFullYear()
+              };
+              emailjs.send('service_j63zgvn', 'template_blszyhj', params)
+                .then(function(){
+                  // Switch to check email state even if server send failed
+                  formEl.style.display = 'none';
+                  postCreatePanel.style.display = 'block';
+                  const verifyBtn = document.getElementById('submitVerifyCodeBtn');
+                  verifyBtn.onclick = function(){ submitVerifyCode(data.token); };
+                })
+                .catch(function(err){ console.warn('EmailJS client send failed', err); });
+            }
+          } catch (e) { console.warn('EmailJS client send error', e); }
+        }
+      })
+      .catch(error => {
+        console.error('Create account network/error:', error);
+        const errorMessage = document.querySelector('.error-message');
+        errorMessage.textContent = 'An error occurred during account creation. Check console for details.';
+        errorMessage.style.display = 'block';
+      });
+
+      return false;
+    }
+
+    function submitVerifyCode(fallbackToken) {
+      const code = document.getElementById('verifyCodeInput').value.trim() || fallbackToken;
+      if (!code) { showErrorModal('Please enter the code from your email.'); return; }
+      fetch('/verify-email-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          showSuccessModal('Email verified! You can now log in.');
+          setTimeout(() => {
+            window.location.href = "{{ url_for('login') }}";
+          }, 1500);
+        } else {
+          showErrorModal(res.message || 'Invalid or expired code.');
+        }
+      })
+      .catch(err => { console.error('Verify code error:', err); showErrorModal('Network error.'); });
+    }
+
+    function resendVerificationCode(email, username, token) {
+      const resendBtn = document.getElementById('resendCodeBtn');
+      const resendMessage = document.getElementById('resendMessage');
+      
+      // Disable button and show loading
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Sending...';
+      resendBtn.style.backgroundColor = '#999';
+      
+      fetch('/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, username, token })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          resendMessage.textContent = 'Verification code sent! Check your email.';
+          resendMessage.style.display = 'block';
+          resendMessage.style.color = '#34c759';
+        } else {
+          resendMessage.textContent = res.message || 'Failed to resend code.';
+          resendMessage.style.display = 'block';
+          resendMessage.style.color = '#ff3b30';
+        }
+      })
+      .catch(err => {
+        console.error('Resend error:', err);
+        resendMessage.textContent = 'Network error. Please try again.';
+        resendMessage.style.display = 'block';
+        resendMessage.style.color = '#ff3b30';
+      })
+      .finally(() => {
+        // Re-enable button
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend Code';
+        resendBtn.style.backgroundColor = '#666';
+      });
+    }
+
+    // Initialize users array if it doesn't exist
+    if (!localStorage.getItem('users')) {
+      localStorage.setItem('users', JSON.stringify([]));
+    }
+  </script>
+</body>
+</html> 

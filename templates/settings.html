@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PosturEase - Settings</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+  <style>
+    :root {
+      --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --text-black: rgba(0, 0, 0, 1);
+      --primary-color: #007AFF;
+      --primary-light: #4A9EFF;
+      --primary-dark: #0056CC;
+      --background-color: #f8fafc;
+      --card-background: rgba(255, 255, 255, 0.98);
+      --text-color: var(--text-black);
+      --secondary-text: #64748b;
+      --border-color: #e2e8f0;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --error-color: #ef4444;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-2xl: 20px;
+    }
+
+    /* Dark mode variables */
+    [data-theme="dark"] {
+      --background-color: #0f172a;
+      --card-background: rgba(30, 41, 59, 0.95);
+      --text-color: #f1f5f9;
+      --secondary-text: #94a3b8;
+      --border-color: #334155;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, var(--background-color) 0%, #e0f2fe 100%);
+      font-family: var(--font-family-sf);
+      min-height: 100vh;
+      color: var(--text-color);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Add smooth transition for all text elements */
+    .settings-container,
+    .modal-content,
+    .settings-item,
+    .settings-text,
+    .modal-title,
+    .setting-option-title,
+    .setting-option-description,
+    .text-size-btn,
+    .save-btn,
+    .menu-item,
+    .menu-header-text {
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Add animation classes */
+    @keyframes textShrink {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes textGrow {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .text-shrinking {
+      animation: textShrink 0.3s ease-in-out;
+    }
+
+    .text-growing {
+      animation: textGrow 0.3s ease-in-out;
+    }
+
+    .background-images {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .background-images img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-black);
+      letter-spacing: -0.02em;
+    }
+
+    .menu-button {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      margin-left: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .menu-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .menu-button img {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-button:hover img {
+      transform: scale(1.1);
+    }
+
+    .settings-container {
+      max-width: 680px;
+      margin: 60px auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .settings-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-color);
+      text-align: center;
+      margin-bottom: 48px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+    }
+
+    .settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-item {
+      background: var(--card-background);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      color: var(--text-color);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+    }
+
+    .settings-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, transparent, rgba(0, 122, 255, 0.05), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .settings-item:hover::before {
+      transform: translateX(100%);
+    }
+
+    .settings-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-color);
+    }
+
+    .settings-item:active {
+      transform: translateY(-2px);
+      transition: transform 0.1s ease;
+    }
+
+    .settings-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-color);
+      background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(0, 122, 255, 0.05));
+      border-radius: var(--radius-lg);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 20px;
+      border: 1px solid rgba(0, 122, 255, 0.1);
+    }
+
+    .settings-item:hover .settings-icon {
+      transform: scale(1.05) rotate(5deg);
+      background: linear-gradient(135deg, rgba(0, 122, 255, 0.2), rgba(0, 122, 255, 0.1));
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+    }
+
+    .settings-text {
+      flex: 1;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-color);
+      letter-spacing: -0.01em;
+    }
+
+    .settings-arrow {
+      color: var(--secondary-text);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 16px;
+    }
+
+    .settings-item:hover .settings-arrow {
+      transform: translateX(6px);
+      color: var(--primary-color);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card-background);
+      padding: 32px;
+      border-radius: var(--radius-2xl);
+      max-width: 520px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      color: var(--text-color);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(20px);
+      animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      flex: 1;
+      color: var(--text-color);
+      letter-spacing: -0.02em;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--secondary-text);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+    }
+
+    .modal-close:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-color);
+      border-color: var(--border-color);
+      transform: scale(1.1);
+    }
+
+    .modal-body {
+      margin-bottom: 24px;
+    }
+
+    .setting-option {
+      margin-bottom: 24px;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.6);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+    }
+
+    .setting-option:hover {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .setting-option-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-color);
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .setting-option-description {
+      color: var(--secondary-text);
+      font-size: 14px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Toggle Switch Enhancement */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 56px;
+      height: 32px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 32px;
+      border: 1px solid var(--border-color);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 24px;
+      width: 24px;
+      left: 4px;
+      bottom: 3px;
+      background: linear-gradient(135deg, #ffffff, #f8fafc);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+    }
+
+    input:checked + .toggle-slider {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      border-color: var(--primary-color);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Button Styles Enhancement */
+    .text-size-btn, .save-btn {
+      padding: 14px 24px;
+      border-radius: var(--radius-lg);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: none;
+      font-family: var(--font-family-sf);
+      letter-spacing: -0.01em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .text-size-btn {
+      background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(0, 122, 255, 0.05));
+      color: var(--primary-color);
+      border: 1px solid rgba(0, 122, 255, 0.2);
+    }
+
+    .text-size-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 122, 255, 0.2), rgba(0, 122, 255, 0.1));
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-color);
+    }
+
+    .save-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      color: white;
+      width: 100%;
+      margin-top: 24px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--primary-color);
+    }
+
+    .save-btn:hover {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .save-btn:active {
+      transform: translateY(0);
+      transition: transform 0.1s ease;
+    }
+
+    /* Text Size Controls Enhancement */
+    .text-size-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 15px;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 10px;
+      border-radius: 12px;
+    }
+
+    #textSizeLabel {
+      min-width: 80px;
+      text-align: center;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    /* Side Menu Enhancement */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: var(--card-background);
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease-in-out;
+      z-index: 1000;
+      padding: 20px;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    .side-menu.active {
+      right: 0;
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .menu-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-bottom: 30px;
+      padding: 0 15px;
+      position: relative;
+    }
+
+    .menu-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .menu-header-text {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--text-color);
+    }
+
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .menu-item {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-black);
+      text-decoration: none;
+      border-radius: 12px;
+      margin: 5px 0;
+    }
+
+    .menu-item:hover {
+      background: var(--neutral-100);
+      transform: translateX(4px);
+    }
+
+    .menu-item.active {
+      background: var(--primary-blue);
+      color: var(--text-inverse);
+    }
+
+    .menu-item.active i {
+      color: var(--text-inverse);
+    }
+
+    .menu-item i {
+      width: 24px;
+      text-align: center;
+      color: var(--primary-color);
+    }
+
+    .menu-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-black);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+      z-index: 999;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .logout-item {
+      color: #ff3b30 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-images">
+    <img src="{{ url_for('static', filename='images/image-6-2.png') }}" alt="Background 1" />
+    <img src="{{ url_for('static', filename='images/image-6-3.png') }}" alt="Background 2" />
+  </div>
+
+  <div class="top-bar">
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo" class="logo">
+      <div class="logo-text">PosturEase</div>
+    </div>
+    <button class="menu-button" onclick="toggleMenu()">
+      <img src="{{ url_for('static', filename='images/icon-9.svg') }}" alt="Menu">
+    </button>
+  </div>
+
+  <div class="settings-container">
+    <h1 class="settings-title">Settings</h1>
+    
+    <div class="settings-list">
+      <a href="#" class="settings-item" onclick="openModal('notificationModal')">
+        <div class="settings-icon">
+          <i class="fas fa-bell"></i>
+        </div>
+        <div class="settings-text">Notification Settings</div>
+        <div class="settings-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="settings-item" onclick="openModal('profileSecurityModal')">
+        <div class="settings-icon">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="settings-text">Profile & Security</div>
+        <div class="settings-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="settings-item" onclick="openModal('privacyModal')">
+        <div class="settings-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <div class="settings-text">Privacy & Terms and Conditions</div>
+        <div class="settings-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="settings-item" onclick="openModal('dataHistoryModal')">
+        <div class="settings-icon">
+          <i class="fas fa-database"></i>
+        </div>
+        <div class="settings-text">Data History</div>
+        <div class="settings-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="settings-item" onclick="openModal('cameraModal')">
+        <div class="settings-icon">
+          <i class="fas fa-video"></i>
+        </div>
+        <div class="settings-text">Camera Settings</div>
+        <div class="settings-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
+      
+
+      <a href="#" class="settings-item" onclick="openModal('themeModal')">
+        <div class="settings-icon">
+          <i class="fas fa-universal-access"></i>
+        </div>
+        <div class="settings-text">Themes & Accessibility</div>
+        <div class="settings-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Notification Settings Modal -->
+  <div class="modal" id="notificationModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Notification Settings</div>
+        <button class="modal-close" onclick="closeModal('notificationModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Audio Cues</div>
+          <div class="setting-option-description">Play sound alerts when poor posture is detected</div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="audioCuesToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button class="save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile & Security Modal -->
+  <div class="modal" id="profileSecurityModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Profile & Security</div>
+        <button class="modal-close" onclick="closeModal('profileSecurityModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Password Reset</div>
+          <div class="setting-option-description">Change your account password</div>
+          <a class="text-size-btn" href="{{ url_for('change_password') }}">Change Password</a>
+        </div>
+        <button class="save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy & Terms Modal -->
+  <div class="modal" id="privacyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Privacy & Terms</div>
+        <button class="modal-close" onclick="closeModal('privacyModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Terms of Service</div>
+          <div class="setting-option-description">Read our terms of service and privacy policy</div>
+          <button class="text-size-btn" onclick="openModal('termsModal')">View Terms</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms and Conditions Modal -->
+  <div class="modal" id="termsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Terms and Conditions</div>
+        <button class="modal-close" onclick="closeModal('termsModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+          <h3>1. Acceptance of Terms</h3>
+          <p>By accessing and using PosturEase, you agree to be bound by these Terms and Conditions.</p>
+
+          <h3>2. Description of Service</h3>
+          <p>PosturEase is a posture monitoring application that helps users maintain proper posture through real-time monitoring and alerts.</p>
+
+          <h3>3. User Responsibilities</h3>
+          <p>Users are responsible for:</p>
+          <ul>
+            <li>Maintaining the accuracy of their account information</li>
+            <li>Protecting their account credentials</li>
+            <li>Using the application as intended</li>
+          </ul>
+
+          <h3>4. Privacy and Data Collection</h3>
+          <p>We collect and process:</p>
+          <ul>
+            <li>Posture data for analysis and improvement</li>
+            <li>Basic account information</li>
+            <li>Usage statistics to improve the service</li>
+          </ul>
+
+          <h3>5. Limitation of Liability</h3>
+          <p>PosturEase is provided "as is" without any warranties. We are not liable for any damages arising from the use of our service.</p>
+
+          <h3>6. Changes to Terms</h3>
+          <p>We reserve the right to modify these terms at any time. Users will be notified of significant changes.</p>
+
+          <h3>7. Contact Information</h3>
+          <p>For questions about these terms, please contact us at support@posturease.com</p>
+        </div>
+        <button class="text-size-btn" onclick="closeModal('termsModal')" style="width: 100%; margin-top: 20px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data History Modal -->
+  <div class="modal" id="dataHistoryModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Data History</div>
+        <button class="modal-close" onclick="closeModal('dataHistoryModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Export Data</div>
+          <div class="setting-option-description">Download your posture history data</div>
+          <button id="exportDataBtn" class="text-size-btn" type="button">Export</button>
+        </div>
+        <div class="setting-option">
+          <div class="setting-option-title">Clear History</div>
+          <div class="setting-option-description">Delete all your posture history data</div>
+          <button id="clearHistoryBtn" type="button" class="text-size-btn">Clear Data</button>
+        </div>
+        <div class="setting-option">
+          <div class="setting-option-title">Auto-Delete</div>
+          <div class="setting-option-description">Automatically delete data older than 30 days</div>
+          <label class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button class="save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera Settings Modal -->
+  <div class="modal" id="cameraModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Camera Settings</div>
+        <button class="modal-close" onclick="closeModal('cameraModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Mirror Camera</div>
+          <div class="setting-option-description">Enable mirroring to show yourself as you would appear in a mirror</div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cameraMirrorToggle" checked onchange="updateCameraMirror()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-option">
+          <div class="setting-option-title">Camera Preview</div>
+          <div class="setting-option-description">Test your camera settings in real-time</div>
+          <button class="text-size-btn" onclick="testCameraSettings()">Test Camera</button>
+        </div>
+        <button class="save-btn" onclick="saveCameraSettings()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Theme & Accessibility Modal -->
+  <div class="modal" id="themeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Themes & Accessibility</div>
+        <button class="modal-close" onclick="closeModal('themeModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Text Size</div>
+          <div class="setting-option-description">Adjust the text size for better readability</div>
+          <div class="text-size-controls">
+            <button class="text-size-btn" onclick="changeTextSize('decrease')">A-</button>
+            <span id="textSizeLabel">Normal</span>
+            <button class="text-size-btn" onclick="changeTextSize('increase')">A+</button>
+          </div>
+        </div>
+        <button class="save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear History Confirmation Modal -->
+  <div class="modal" id="clearHistoryModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">⚠️ Clear All History</div>
+        <button class="modal-close" onclick="closeModal('clearHistoryModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option" style="border-left: 4px solid #ff3b30; background: rgba(255, 59, 48, 0.05);">
+          <div class="setting-option-title" style="color: #ff3b30;">⚠️ Warning: This action cannot be undone!</div>
+          <div class="setting-option-description">
+            You are about to permanently delete ALL your posture history data. This includes:
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>All posture monitoring sessions</li>
+              <li>Posture improvement statistics</li>
+              <li>Correction tracking data</li>
+              <li>Session duration records</li>
+            </ul>
+            <strong>This data cannot be recovered once deleted.</strong>
+          </div>
+        </div>
+        
+        <div class="setting-option" style="border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05);">
+          <div class="setting-option-title" style="color: #f59e0b;">💡 Consider exporting your data first</div>
+          <div class="setting-option-description">
+            Before clearing your history, you might want to export your data for backup purposes.
+            <br><br>
+            <button class="text-size-btn" onclick="closeModal('clearHistoryModal'); openModal('dataHistoryModal');" style="background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(0, 122, 255, 0.05)); color: var(--primary-color);">
+              <i class="fas fa-download"></i> Export Data First
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="text-size-btn" onclick="closeModal('clearHistoryModal')" style="flex: 1; background: #6b7280; color: white;">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button class="text-size-btn" onclick="confirmClearHistory()" style="flex: 1; background: #ff3b30; color: white;">
+            <i class="fas fa-trash"></i> Yes, Delete All Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera Test Modal -->
+  <div class="modal" id="cameraTestModal">
+    <div class="modal-content" style="max-width: 800px; width: 95%;">
+      <div class="modal-header">
+        <div class="modal-title">📹 Camera Test</div>
+        <button class="modal-close" onclick="closeModal('cameraTestModal'); stopCameraTest()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-option">
+          <div class="setting-option-title">Camera Preview</div>
+          <div class="setting-option-description">Test your camera settings and preview how you'll appear during posture monitoring</div>
+          
+          <div style="text-align: center; margin: 20px 0;">
+            <video id="cameraTestVideo" autoplay muted playsinline style="width: 100%; max-width: 500px; border-radius: 12px; background: #000;"></video>
+            <div id="cameraTestStatus" style="margin-top: 10px; color: var(--secondary-text);">
+              <i class="fas fa-spinner fa-spin"></i> Starting camera...
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+            <button class="text-size-btn" onclick="closeModal('cameraTestModal'); stopCameraTest()" style="background: #6b7280; color: white;">
+              <i class="fas fa-times"></i> Close
+            </button>
+            <button class="text-size-btn" onclick="closeModal('cameraTestModal'); stopCameraTest(); window.open('{{ url_for("index") }}', '_blank');" style="background: var(--primary-color); color: white;">
+              <i class="fas fa-play"></i> Start Monitoring
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <div class="menu-header">
+      <div class="menu-logo-container">
+        <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo">
+        <span class="menu-header-text">PosturEase</span>
+      </div>
+      <button class="menu-close" onclick="toggleMenu()">&times;</button>
+    </div>
+    <nav class="menu-items">
+      <a href="{{ url_for('index') }}" class="menu-item">
+        <i class="fas fa-home"></i>
+        Home
+      </a>
+      <a href="{{ url_for('profile') }}" class="menu-item">
+        <i class="fas fa-user"></i>
+        View Profile
+      </a>
+      <a href="{{ url_for('exercises') }}" class="menu-item">
+        <i class="fas fa-dumbbell"></i>
+        Stretching & Exercises
+      </a>
+      <a href="{{ url_for('posture_history') }}" class="menu-item">
+        <i class="fas fa-history"></i>
+        Posture History
+      </a>
+      <a href="{{ url_for('settings') }}" class="menu-item active">
+        <i class="fas fa-cog"></i>
+        Settings
+      </a>
+      <a href="#" class="menu-item logout-item" onclick="logout(); return false;">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </a>
+    </nav>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <script>
+    function toggleMenu() {
+      const sideMenu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('overlay');
+      sideMenu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.classList.add('active');
+
+      // Initialize values when opening Notification Settings
+      if (modalId === 'notificationModal') {
+        const audioToggle = document.getElementById('audioCuesToggle');
+        if (audioToggle) {
+          const saved = localStorage.getItem('audioCuesEnabled');
+          audioToggle.checked = saved === null ? true : (saved === 'true');
+        }
+      }
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.classList.remove('active');
+    }
+
+    function logout(event) {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+
+    // Close modals when clicking outside
+    document.addEventListener('click', (e) => {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+
+    // Check authentication
+    window.onload = function() {
+      if (localStorage.getItem('isLoggedIn') !== 'true') {
+        window.location.href = "{{ url_for('login') }}";
+      }
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const sideMenu = document.getElementById('sideMenu');
+      const menuButton = document.querySelector('.menu-button');
+      if (!sideMenu.contains(e.target) && !menuButton.contains(e.target)) {
+        sideMenu.classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+      }
+    });
+
+    // Save settings functionality
+    document.querySelectorAll('.save-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        // Get the parent modal
+        const modal = this.closest('.modal');
+        // Only show save message if it's not the terms modal
+        if (modal.id !== 'termsModal') {
+          // Save Notification Settings
+          if (modal.id === 'notificationModal') {
+            const audioToggle = document.getElementById('audioCuesToggle');
+            if (audioToggle) {
+              localStorage.setItem('audioCuesEnabled', String(audioToggle.checked));
+            }
+          }
+          // Save the settings
+          showSuccessModal('Settings saved successfully!');
+        }
+        // Close the modal
+        modal.classList.remove('active');
+      });
+    });
+
+    // Clear posture history functionality
+    (function setupClearHistory() {
+      const btn = document.getElementById('clearHistoryBtn');
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        openModal('clearHistoryModal');
+      });
+    })();
+
+    // Export posture history as PDF with personalized recommendations
+    (function setupExportData() {
+      const btn = document.getElementById('exportDataBtn');
+      if (!btn) return;
+      btn.addEventListener('click', async function() {
+        // Show loading state
+        const originalText = btn.textContent;
+        btn.textContent = 'Generating Report...';
+        btn.disabled = true;
+        
+        try {
+          const res = await fetch("{{ url_for('export_posture_history') }}", { method: 'GET' });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showErrorModal('Failed to export: ' + (data.message || res.statusText));
+            return;
+          }
+          const blob = await res.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'PosturEase_Health_Report.pdf';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        } catch (e) {
+          showErrorModal('Error exporting data. Please try again.');
+        } finally {
+          // Reset button state
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
+      });
+    })();
+
+    // Color theme selection
+    document.querySelectorAll('.color-option').forEach(option => {
+      option.addEventListener('click', function() {
+        // Remove active class from all options
+        document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+        // Add active class to selected option
+        this.classList.add('active');
+      });
+    });
+
+    // Text size functionality
+    function changeTextSize(action) {
+      const currentSize = localStorage.getItem('textSize') || 'normal';
+      let newSize;
+      
+      switch(currentSize) {
+        case 'small':
+          newSize = action === 'increase' ? 'normal' : 'small';
+          break;
+        case 'normal':
+          newSize = action === 'increase' ? 'large' : 'small';
+          break;
+        case 'large':
+          newSize = action === 'increase' ? 'large' : 'normal';
+          break;
+        default:
+          newSize = 'normal';
+      }
+
+      // Get all text elements
+      const textElements = document.querySelectorAll('.settings-container, .modal-content, .settings-item, .settings-text, .modal-title, .setting-option-title, .setting-option-description, .text-size-btn, .save-btn, .menu-item');
+      
+      // Add animation class
+      textElements.forEach(element => {
+        element.classList.add(action === 'increase' ? 'text-growing' : 'text-shrinking');
+      });
+
+      // Apply the new size immediately
+      const newFontSize = newSize === 'small' ? '14px' : 
+                         newSize === 'large' ? '18px' : '16px';
+      
+      // Apply to body and all text elements
+      document.body.style.fontSize = newFontSize;
+      textElements.forEach(element => {
+        element.style.fontSize = newFontSize;
+      });
+      
+      // Update the label
+      document.getElementById('textSizeLabel').textContent = 
+        newSize.charAt(0).toUpperCase() + newSize.slice(1);
+      
+      // Save the preference
+      localStorage.setItem('textSize', newSize);
+
+      // Remove animation classes after animation completes
+      setTimeout(() => {
+        textElements.forEach(element => {
+          element.classList.remove('text-growing', 'text-shrinking');
+        });
+      }, 300);
+    }
+
+    // Load text size preference on page load
+    window.addEventListener('load', function() {
+      const savedSize = localStorage.getItem('textSize') || 'normal';
+      const fontSize = savedSize === 'small' ? '14px' : 
+                      savedSize === 'large' ? '18px' : '16px';
+      
+      // Apply to body and all text elements
+      document.body.style.fontSize = fontSize;
+      const textElements = document.querySelectorAll('.settings-container, .modal-content, .settings-item, .settings-text, .modal-title, .setting-option-title, .setting-option-description, .text-size-btn, .save-btn, .menu-item');
+      textElements.forEach(element => {
+        element.style.fontSize = fontSize;
+      });
+      
+      document.getElementById('textSizeLabel').textContent = 
+        savedSize.charAt(0).toUpperCase() + savedSize.slice(1);
+      
+      // Load camera settings
+      loadCameraSettings();
+      
+      
+    });
+
+    // Camera settings functions
+    function loadCameraSettings() {
+      // Load saved camera mirror setting
+      const savedMirror = localStorage.getItem('cameraMirror');
+      const mirrorToggle = document.getElementById('cameraMirrorToggle');
+      if (mirrorToggle) {
+        mirrorToggle.checked = savedMirror !== 'false';
+      }
+    }
+
+    function saveCameraSettings() {
+      const mirrorToggle = document.getElementById('cameraMirrorToggle');
+      const mirrorEnabled = mirrorToggle ? mirrorToggle.checked : true;
+      
+      // Save to localStorage
+      localStorage.setItem('cameraMirror', mirrorEnabled);
+      
+      // Send to server
+      fetch('/update-camera-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mirror_enabled: mirrorEnabled
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showSuccessModal('Camera settings saved successfully!');
+          closeModal('cameraModal');
+        } else {
+          showErrorModal('Failed to save camera settings: ' + (data.message || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Error saving camera settings:', error);
+        showErrorModal('Error saving camera settings. Please try again.');
+      });
+    }
+
+    let cameraTestStream = null;
+
+    function testCameraSettings() {
+      // Open camera test modal
+      openModal('cameraTestModal');
+      startCameraTest();
+    }
+
+    async function startCameraTest() {
+      const video = document.getElementById('cameraTestVideo');
+      const status = document.getElementById('cameraTestStatus');
+      
+      try {
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting camera...';
+        
+        // Get user media with camera constraints
+        cameraTestStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: 'user'
+          },
+          audio: false
+        });
+        
+        // Apply mirror setting
+        const mirrorEnabled = localStorage.getItem('cameraMirror') !== 'false';
+        video.style.transform = mirrorEnabled ? 'scaleX(-1)' : 'scaleX(1)';
+        
+        video.srcObject = cameraTestStream;
+        video.play();
+        
+        status.innerHTML = '<i class="fas fa-check-circle" style="color: #10b981;"></i> Camera is working! You can see yourself in the preview.';
+        
+      } catch (error) {
+        console.error('Camera access error:', error);
+        status.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i> Camera access denied or not available. Please check your camera permissions.';
+      }
+    }
+
+    function stopCameraTest() {
+      if (cameraTestStream) {
+        cameraTestStream.getTracks().forEach(track => track.stop());
+        cameraTestStream = null;
+      }
+      const video = document.getElementById('cameraTestVideo');
+      if (video) {
+        video.srcObject = null;
+      }
+    }
+
+    function updateCameraMirror() {
+      const mirrorToggle = document.getElementById('cameraMirrorToggle');
+      const video = document.getElementById('cameraTestVideo');
+      
+      if (mirrorToggle && video && cameraTestStream) {
+        const mirrorEnabled = mirrorToggle.checked;
+        video.style.transform = mirrorEnabled ? 'scaleX(-1)' : 'scaleX(1)';
+        
+        // Save the setting immediately
+        localStorage.setItem('cameraMirror', mirrorEnabled);
+      }
+    }
+
+    // Clear history confirmation function
+    async function confirmClearHistory() {
+      const btn = document.getElementById('clearHistoryBtn');
+      if (!btn) return;
+      
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Clearing...';
+      
+      try {
+        const response = await fetch("{{ url_for('clear_posture_history') }}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (data && data.success) {
+          showSuccessModal(`History cleared successfully. Deleted ${data.deleted || 0} record(s).`);
+          closeModal('clearHistoryModal');
+        } else {
+          showErrorModal('Failed to clear history: ' + (data && data.message ? data.message : 'Unknown error'));
+        }
+      } catch (err) {
+        showErrorModal('Error clearing history. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    // Success and Error modal functions
+    function showSuccessModal(message) {
+      const modal = document.createElement('div');
+      modal.className = 'modal active';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 400px;">
+          <div class="modal-header">
+            <div class="modal-title" style="color: #10b981;">✅ Success</div>
+            <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p>${message}</p>
+            <button class="save-btn" onclick="this.closest('.modal').remove()" style="width: 100%; margin-top: 20px;">OK</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function showErrorModal(message) {
+      const modal = document.createElement('div');
+      modal.className = 'modal active';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 400px;">
+          <div class="modal-header">
+            <div class="modal-title" style="color: #ef4444;">❌ Error</div>
+            <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p>${message}</p>
+            <button class="save-btn" onclick="this.closest('.modal').remove()" style="width: 100%; margin-top: 20px; background: #ef4444;">OK</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+  </script>
+</body>
+</html> 

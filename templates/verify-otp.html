@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PosturEase - Verify Email</title>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --text-black: rgba(0, 0, 0, 1);
+      --primary-color: #007AFF;
+      --primary-hover: #0056b3;
+      --background-color: #e8fefb;
+      --card-background: rgba(255, 255, 255, 0.95);
+      --text-color: var(--text-black);
+      --secondary-text: #666;
+      --border-color: #ddd;
+      --input-background: white;
+      --error-color: #ff3b30;
+      --success-color: #34C759;
+      --warning-color: #ff9500;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      font-family: var(--font-family-sf);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .background-images {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .background-images img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .verify-container {
+      background: var(--card-background);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 10px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 15px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--secondary-text);
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .otp-container {
+      margin-bottom: 30px;
+    }
+
+    .otp-input {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      font-family: var(--font-family-sf);
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 2px;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.3s;
+      background-color: var(--input-background);
+      color: var(--text-color);
+    }
+
+    .otp-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    .otp-input::placeholder {
+      color: var(--secondary-text);
+      font-weight: 400;
+      letter-spacing: normal;
+    }
+
+    .verify-button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 12px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 20px;
+    }
+
+    .verify-button:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .verify-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .resend-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .resend-text {
+      font-size: 14px;
+      color: var(--secondary-text);
+      margin-bottom: 15px;
+    }
+
+    .resend-button {
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-right: 10px;
+    }
+
+    .resend-button:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .resend-button:disabled {
+      background-color: transparent;
+      color: #ccc;
+      border-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .back-button {
+      background-color: #f5f5f5;
+      color: var(--text-color);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .back-button:hover {
+      background-color: #e0e0e0;
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .success-message {
+      color: var(--success-color);
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .countdown {
+      color: var(--warning-color);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    /* Success Modal */
+    .success-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .success-modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background-color: var(--success-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: white;
+      font-size: 40px;
+    }
+
+    .success-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 10px;
+    }
+
+    .success-text {
+      font-size: 16px;
+      color: var(--secondary-text);
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .success-button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .success-button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-images">
+    <img src="{{ url_for('static', filename='images/image-6-2.png') }}" alt="Background 1" />
+    <img src="{{ url_for('static', filename='images/image-6-3.png') }}" alt="Background 2" />
+  </div>
+
+  <div class="verify-container">
+    <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo" class="logo">
+    <div class="logo-text">PosturEase</div>
+    <h1 class="title">Verify Your Email</h1>
+    <p class="subtitle">We've sent a verification code to your email address. Please enter the code below to continue.</p>
+    
+    <form id="verifyForm">
+      <div class="otp-container">
+        <input type="text" id="otpCode" class="otp-input" placeholder="Enter verification code" maxlength="6" required>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+      </div>
+      
+      <button type="submit" class="verify-button" id="verifyBtn">
+        <span id="verifyText">Verify Code</span>
+        <span id="verifyLoading" class="loading" style="display: none;"></span>
+      </button>
+      
+      <div class="resend-section">
+        <p class="resend-text">Didn't receive the code?</p>
+        <button type="button" class="resend-button" id="resendBtn">Resend Code</button>
+        <button type="button" class="back-button" onclick="window.location.href='{{ url_for('login') }}';">Back to Login</button>
+        <div id="countdown" class="countdown"></div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="success-modal">
+    <div class="success-modal-content">
+      <div class="success-icon">
+        <i class="fas fa-check"></i>
+      </div>
+      <h2 class="success-title">Verification Successful!</h2>
+      <p class="success-text" id="successModalText">Your email has been verified successfully.</p>
+      <button class="success-button" id="successModalBtn">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    let resendTimer = null;
+    let resendCountdown = 60;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      const otpInput = document.getElementById('otpCode');
+      const verifyBtn = document.getElementById('verifyBtn');
+      const resendBtn = document.getElementById('resendBtn');
+      const countdownEl = document.getElementById('countdown');
+
+      // Auto-focus on OTP input
+      otpInput.focus();
+
+      // Format OTP input (only numbers, max 6 digits)
+      otpInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 6);
+        e.target.value = value;
+        
+        // Auto-submit when 6 digits are entered
+        if (value.length === 6) {
+          verifyCode();
+        }
+      });
+
+      // Handle Enter key
+      otpInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          verifyCode();
+        }
+      });
+
+      // Verify button click
+      verifyBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        verifyCode();
+      });
+
+      // Resend button click
+      resendBtn.addEventListener('click', function() {
+        resendCode();
+      });
+
+      // Start resend countdown
+      startResendCountdown();
+
+      function verifyCode() {
+        const code = otpInput.value.trim();
+        
+        if (!code) {
+          showError('Please enter the verification code.');
+          return;
+        }
+
+        if (code.length !== 6) {
+          showError('Please enter a 6-digit verification code.');
+          return;
+        }
+
+        // Show loading state
+        setLoadingState(true);
+
+        // Send verification request
+        fetch('/verify-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code: code,
+            type: '{{ verification_type }}',
+            email: '{{ email }}'
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showSuccessModal(data.message || 'Verification successful!');
+          } else {
+            showError(data.message || 'Invalid verification code.');
+          }
+        })
+        .catch(error => {
+          console.error('Verification error:', error);
+          showError('Network error. Please try again.');
+        })
+        .finally(() => {
+          setLoadingState(false);
+        });
+      }
+
+      function resendCode() {
+        setLoadingState(true, 'resend');
+        
+        fetch('/resend-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: '{{ verification_type }}',
+            email: '{{ email }}'
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showSuccess('New verification code sent!');
+            startResendCountdown();
+          } else {
+            showError(data.message || 'Failed to resend code.');
+          }
+        })
+        .catch(error => {
+          console.error('Resend error:', error);
+          showError('Network error. Please try again.');
+        })
+        .finally(() => {
+          setLoadingState(false, 'resend');
+        });
+      }
+
+      function setLoadingState(loading, type = 'verify') {
+        if (type === 'verify') {
+          const verifyText = document.getElementById('verifyText');
+          const verifyLoading = document.getElementById('verifyLoading');
+          const verifyBtn = document.getElementById('verifyBtn');
+          
+          if (loading) {
+            verifyText.style.display = 'none';
+            verifyLoading.style.display = 'inline-block';
+            verifyBtn.disabled = true;
+          } else {
+            verifyText.style.display = 'inline';
+            verifyLoading.style.display = 'none';
+            verifyBtn.disabled = false;
+          }
+        } else if (type === 'resend') {
+          const resendBtn = document.getElementById('resendBtn');
+          if (loading) {
+            resendBtn.disabled = true;
+            resendBtn.textContent = 'Sending...';
+          } else {
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'Resend Code';
+          }
+        }
+      }
+
+      function showError(message) {
+        const errorEl = document.getElementById('errorMessage');
+        const successEl = document.getElementById('successMessage');
+        
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+        successEl.style.display = 'none';
+      }
+
+      function showSuccess(message) {
+        const errorEl = document.getElementById('errorMessage');
+        const successEl = document.getElementById('successMessage');
+        
+        successEl.textContent = message;
+        successEl.style.display = 'block';
+        errorEl.style.display = 'none';
+      }
+
+      function showSuccessModal(message) {
+        const modal = document.getElementById('successModal');
+        const modalText = document.getElementById('successModalText');
+        const modalBtn = document.getElementById('successModalBtn');
+        
+        modalText.textContent = message;
+        modal.style.display = 'flex';
+        
+        modalBtn.onclick = function() {
+          modal.style.display = 'none';
+          // Redirect based on verification type
+          if ('{{ verification_type }}' === 'registration') {
+            window.location.href = '{{ url_for('login') }}';
+          } else if ('{{ verification_type }}' === 'password_change') {
+            window.location.href = '{{ url_for('index') }}';
+          } else {
+            window.location.href = '{{ url_for('login') }}';
+          }
+        };
+      }
+
+      function startResendCountdown() {
+        resendCountdown = 60;
+        const resendBtn = document.getElementById('resendBtn');
+        const countdownEl = document.getElementById('countdown');
+        
+        resendBtn.disabled = true;
+        
+        resendTimer = setInterval(() => {
+          resendCountdown--;
+          countdownEl.textContent = `Resend available in ${resendCountdown} seconds`;
+          
+          if (resendCountdown <= 0) {
+            clearInterval(resendTimer);
+            resendBtn.disabled = false;
+            countdownEl.textContent = '';
+          }
+        }, 1000);
+      }
+    });
+
+    // Clean up timer on page unload
+    window.addEventListener('beforeunload', function() {
+      if (resendTimer) {
+        clearInterval(resendTimer);
+      }
+    });
+  </script>
+</body>
+</html>

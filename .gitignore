@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+.env*/
+
+# Logs
+*.log
+
+# Data/artifacts
+static/uploads/
+Training Again/runs/
+*.pt
+*.pth
+*.onnx
+*.weights
+*.ckpt
+*.zip
+*.tar
+*.gz
+*.csv
+
+# IDE
+.vscode/
+.idea/

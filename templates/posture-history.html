@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PosturEase - Posture History</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/common.css') }}">
+  <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+  <style>
+    :root {
+      --font-family-sf: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --text-black: rgba(0, 0, 0, 1);
+      --primary-color: #007AFF;
+      --background-color: #e8fefb;
+      --text-color: var(--text-black);
+      --card-background: rgba(255, 255, 255, 0.95);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --secondary-text: #666;
+      --border-color: #f5f5f5;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      font-family: var(--font-family-sf);
+      min-height: 100vh;
+    }
+
+    .background-images {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .background-images img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-color);
+      letter-spacing: -0.02em;
+    }
+
+    .menu-button {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      margin-left: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .menu-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .menu-button img {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-button:hover img {
+      transform: scale(1.1);
+    }
+
+    .history-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .history-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .user-profile-section {
+      margin-bottom: 30px;
+    }
+
+    .user-profile-card {
+      background: var(--card-background);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .welcome-text {
+      font-size: 14px;
+      color: var(--secondary-text);
+      margin-bottom: 4px;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      background: var(--card-background);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .filter-group {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .filter-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--secondary-text);
+      font-size: 14px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--card-background);
+      color: var(--text-color);
+      font-family: var(--font-family-sf);
+      font-size: 14px;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--card-background);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--secondary-text);
+    }
+
+    .notification-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: var(--secondary-text);
+      font-weight: 500;
+    }
+
+    .notification-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .posture-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .status-icon {
+      width: 28px;
+      height: 28px;
+      font-size: 18px;
+    }
+
+    .status-text {
+      font-weight: 600;
+      color: var(--text-color);
+      font-size: 18px;
+    }
+
+    .posture-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--secondary-text);
+      margin-top: 8px;
+    }
+    
+    .posture-details span {
+      padding: 10px 14px;
+      background: rgba(0, 122, 255, 0.1);
+      border-radius: 10px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .posture-details .good-time {
+      background: rgba(52, 199, 89, 0.2);
+      color: #34C759;
+      font-weight: 600;
+      border: 2px solid rgba(52, 199, 89, 0.3);
+    }
+    
+    .posture-details .bad-time {
+      background: rgba(255, 59, 48, 0.2);
+      color: #FF3B30;
+      font-weight: 600;
+      border: 2px solid rgba(255, 59, 48, 0.3);
+    }
+
+    .chart-container {
+      background: var(--card-background);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--text-color);
+    }
+
+    .chart-wrapper {
+      height: 200px;
+      position: relative;
+    }
+
+    .chart-description {
+      text-align: center;
+      margin-top: 15px;
+      padding: 12px 20px;
+      background: rgba(0, 122, 255, 0.05);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .chart-description p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--secondary-text);
+      font-weight: 500;
+    }
+
+    .good-posture {
+      color: #34C759;
+    }
+
+    .bad-posture {
+      color: #FF3B30;
+    }
+
+    .fair-posture {
+      color: #FF9500;
+    }
+
+    .healthy {
+      color: #34C759;
+    }
+
+    .duration {
+      color: var(--secondary-text);
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      margin-top: 12px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), #34C759);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .no-data-message {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--secondary-text);
+      font-size: 16px;
+      background: var(--card-background);
+      border-radius: 15px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .no-data-message i {
+      font-size: 48px;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      opacity: 0.6;
+    }
+
+    .records-info {
+      text-align: center;
+      padding: 20px;
+      color: var(--secondary-text);
+      font-size: 14px;
+      background: var(--card-background);
+      border-radius: 15px;
+      margin: 20px 0;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card-background);
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      position: relative;
+      color: var(--text-color);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Custom scrollbar for modal */
+    .modal-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .modal-content::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: #0056b3;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--secondary-text);
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--text-color);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      position: sticky;
+      top: 0;
+      background: var(--card-background);
+      padding-bottom: 10px;
+      z-index: 10;
+    }
+
+    .modal-description {
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--secondary-text);
+    }
+
+    /* Side Menu Styles */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background-color: var(--card-background);
+      box-shadow: -2px 0 10px var(--shadow-color);
+      transition: all 0.3s ease-in-out;
+      z-index: 1000;
+      padding: 20px;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    .side-menu.active {
+      right: 0;
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .menu-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-bottom: 30px;
+      padding: 0 15px;
+      position: relative;
+    }
+
+    .menu-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .menu-header-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .menu-item {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: 8px;
+      margin: 5px 0;
+    }
+
+    .menu-item:hover {
+      background: var(--neutral-100);
+      transform: translateX(4px);
+    }
+
+    .menu-item.active {
+      background: var(--primary-blue);
+      color: var(--text-inverse);
+    }
+
+    .menu-item.active i {
+      color: var(--text-inverse);
+    }
+
+    .menu-item i {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+      color: var(--primary-color);
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .menu-close {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-color);
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+      z-index: 999;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .logout-item {
+      color: #ff3b30 !important;
+    }
+
+    /* Simple Delete Button Styles */
+    .notification-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--card-background);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      margin-bottom: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      min-height: 100px;
+    }
+
+    .notification-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      border-color: var(--primary-color);
+    }
+
+    .card-content {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .card-actions {
+      flex-shrink: 0;
+    }
+
+    .delete-btn {
+      background: #ff3b30;
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 50px;
+      min-height: 50px;
+      box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
+    }
+
+    .delete-btn:hover {
+      background: #d70015;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+    }
+
+    .delete-btn i {
+      font-size: 16px;
+    }
+
+
+    /* Info Section Styles */
+    .info-section {
+      margin-bottom: 30px;
+    }
+
+    .info-card {
+      background: var(--card-background);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .info-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .info-header i {
+      font-size: 20px;
+      color: var(--primary-color);
+    }
+
+    .info-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .info-content p {
+      margin: 0 0 16px 0;
+      color: var(--secondary-text);
+      line-height: 1.5;
+    }
+
+    .correction-examples {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(0, 122, 255, 0.05);
+      border-radius: 12px;
+      flex-wrap: wrap;
+    }
+
+    .example-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .example-icon {
+      font-size: 24px;
+    }
+
+    .example-item span:last-child {
+      font-size: 12px;
+      color: var(--secondary-text);
+      font-weight: 500;
+    }
+
+    .example-arrow {
+      font-size: 20px;
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+
+    .correction-tip {
+      background: rgba(52, 199, 89, 0.1);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 4px solid #34C759;
+      margin: 16px 0 0 0;
+      font-size: 14px;
+    }
+
+    /* Medical Analysis Styles */
+    .medical-analysis {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      border: 1px solid #e9ecef;
+    }
+
+    .risk-level {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .risk-level.low-risk {
+      background: rgba(52, 199, 89, 0.2);
+      color: #2BA84A;
+      border: 2px solid #34C759;
+    }
+
+    .risk-level.moderate-risk {
+      background: rgba(255, 149, 0, 0.2);
+      color: #E6850E;
+      border: 2px solid #FF9500;
+    }
+
+    .risk-level.high-risk {
+      background: rgba(255, 59, 48, 0.2);
+      color: #D70015;
+      border: 2px solid #FF3B30;
+    }
+
+    .risk-level.severe-risk {
+      background: rgba(255, 0, 0, 0.2);
+      color: #CC0000;
+      border: 2px solid #FF0000;
+    }
+
+    .risk-level.critical-risk {
+      background: rgba(128, 0, 0, 0.2);
+      color: #800000;
+      border: 2px solid #800000;
+    }
+
+    .medical-recommendation {
+      background: rgba(0, 122, 255, 0.1);
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid #007AFF;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+
+    .medical-analysis p {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    .medical-analysis strong {
+      color: #2c3e50;
+    }
+
+    /* Exercise Recommendations Styles */
+    .exercise-recommendations {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(0, 122, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(0, 122, 255, 0.2);
+    }
+
+    .exercise-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    /* Custom scrollbar for exercise grid */
+    .exercise-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .exercise-grid::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 3px;
+    }
+
+    .exercise-grid::-webkit-scrollbar-thumb {
+      background: rgba(0, 122, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .exercise-grid::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 122, 255, 0.5);
+    }
+
+    .exercise-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .exercise-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      border-color: #007AFF;
+    }
+
+    .exercise-card img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .exercise-card span {
+      font-size: 12px;
+      font-weight: 600;
+      color: #2c3e50;
+      text-align: center;
+      line-height: 1.3;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="background-images">
+    <img src="{{ url_for('static', filename='images/image-6-2.png') }}" alt="Background 1" />
+    <img src="{{ url_for('static', filename='images/image-6-3.png') }}" alt="Background 2" />
+  </div>
+
+  <div class="top-bar">
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo" class="logo">
+      <div class="logo-text">PosturEase</div>
+    </div>
+    <button class="menu-button" onclick="toggleMenu()">
+      <img src="{{ url_for('static', filename='images/icon-9.svg') }}" alt="Menu">
+    </button>
+  </div>
+
+  <div class="history-container">
+    <h1 class="history-title">Posture History</h1>
+    
+    <!-- User Profile Section -->
+    <div class="user-profile-section">
+      <div class="user-profile-card">
+        <div class="user-avatar">
+          <img id="user-profile-picture" src="{{ url_for('static', filename='images/icon-5.svg') }}" alt="User Profile">
+        </div>
+        <div class="user-info">
+          <div class="welcome-text">Welcome back</div>
+          <div class="user-name" id="user-full-name">Loading...</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stats-summary">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.good_posture_percentage }}%</div>
+        <div class="stat-label">Good Posture</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.bad_posture_percentage }}%</div>
+        <div class="stat-label">Bad Posture</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ (stats.total_hours * 60) | round(1) }}</div>
+        <div class="stat-label">Minutes Monitored</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.total_records }}</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.health_score }}%</div>
+        <div class="stat-label">Health Score</div>
+      </div>
+    </div>
+
+    <!-- Posture Trends Chart -->
+    <div class="chart-container">
+      <div class="chart-title">Posture Patterns Over Time</div>
+      <div class="chart-wrapper">
+        <canvas id="postureChart" width="400" height="200"></canvas>
+      </div>
+      <div class="chart-description">
+        <p>📈 Track your posture improvement journey! Each session shows your posture status and corrections made.</p>
+      </div>
+    </div>
+
+    <!-- Corrections Explanation -->
+    <div class="info-section">
+      <div class="info-card">
+        <div class="info-header">
+          <i class="fas fa-info-circle"></i>
+          <h3>How Corrections Work</h3>
+        </div>
+        <div class="info-content">
+          <p><strong>Corrections</strong> are counted when you transition from poor posture back to good posture during a monitoring session.</p>
+          <div class="correction-examples">
+            <div class="example-item">
+              <span class="example-icon">📉</span>
+              <span>Poor posture detected</span>
+            </div>
+            <div class="example-arrow">→</div>
+            <div class="example-item">
+              <span class="example-icon">📈</span>
+              <span>You correct your posture</span>
+            </div>
+            <div class="example-arrow">→</div>
+            <div class="example-item">
+              <span class="example-icon">✅</span>
+              <span>+1 Correction counted</span>
+            </div>
+          </div>
+          <p class="correction-tip">💡 <strong>Tip:</strong> More corrections mean you're actively improving your posture awareness!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-controls">
+      <div class="filter-group">
+        <label>Date Range</label>
+        <select id="dateRange">
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 3 months</option>
+          <option value="365">Last year</option>
+          <option value="custom">Custom Range</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Posture Status</label>
+        <select id="postureStatus">
+          <option value="all">All Status</option>
+          <option value="good">Good Posture</option>
+          <option value="bad">Poor Posture</option>
+          <option value="mixed">Mixed</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Sort By</label>
+        <select id="sortBy">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="duration">Duration</option>
+        </select>
+      </div>
+    </div>
+
+    
+    <div class="notification-list">
+      {% if history %}
+        {% for record in history %}
+        <div class="notification-card" data-record-id="{{ record.id }}" data-posture-type="{{ record.posture_type }}" data-duration-minutes="{{ (record.session_duration / 60) | round(1) if record.session_duration else 30 }}" data-confidence="{{ (record.confidence_score * 100) | round(1) if record.confidence_score else 50 }}" data-good-time="{{ record.good_time if record.good_time is not none else 0 }}" data-bad-time="{{ record.bad_time if record.bad_time is not none else 0 }}" data-recorded-at="{{ record.recorded_at.timestamp() if record.recorded_at else 0 }}" data-recommended-exercises="[]">
+          <div class="card-content" onclick="showNotificationDetails(this.closest('.notification-card'))">
+            <div class="notification-header">
+              <span>Date & Time: {{ record.recorded_at.strftime('%I:%M %p') if record.recorded_at else 'N/A' }}</span>
+              <span>{{ record.recorded_at.strftime('%A / %B %d, %Y') if record.recorded_at else 'N/A' }}</span>
+            </div>
+            <div class="notification-content">
+              <div class="posture-status">
+                {% if 'Good' in record.posture_type %}
+                  <i class="fas fa-check-circle status-icon good-posture">✓</i>
+                  <span class="status-text good-posture">{{ record.posture_type }}</span>
+                {% else %}
+                  <i class="fas fa-exclamation-circle status-icon bad-posture">⚠</i>
+                  <span class="status-text bad-posture">{{ record.posture_type }}</span>
+                {% endif %}
+              </div>
+              <div class="posture-details">
+                {% set duration = record.session_duration if record.session_duration is not none else 1800 %}
+                {% set confidence = record.confidence_score if record.confidence_score is not none else 0 %}
+                {% set good_time_db = record.good_time if record.good_time is not none else 0 %}
+                {% set bad_time_db = record.bad_time if record.bad_time is not none else 0 %}
+                {% if good_time_db > 0 or bad_time_db > 0 %}
+                  {% set good_time = good_time_db %}
+                  {% set bad_time = bad_time_db %}
+                {% else %}
+                  {% set good_time = (duration * confidence) | round(0) %}
+                  {% set bad_time = duration - good_time %}
+                {% endif %}
+                <span>Duration: {{ duration }}s</span>
+                <span class="good-time">Good: {{ good_time }}s</span>
+                <span class="bad-time">Bad: {{ bad_time }}s</span>
+                <span>Corrections: {{ record.corrections_count if record.corrections_count else 0 }}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="delete-btn" onclick="deleteRecord(this.closest('.notification-card').dataset.recordId)" title="Delete this record">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Show total records count -->
+        <div class="records-info">
+          <p id="records-count">Showing {{ history|length }} of {{ stats.total_records }} total sessions</p>
+        </div>
+      {% else %}
+        <div class="no-data-message">
+          <i class="fas fa-chart-line"></i>
+          <p>No posture history available yet. Start monitoring your posture to see your history here!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Notification Details Modal -->
+  <div class="modal" id="notificationModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeNotificationDetails()">&times;</button>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-description" id="modalDescription"></div>
+    </div>
+  </div>
+
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <div class="menu-header">
+      <div class="menu-logo-container">
+        <img src="{{ url_for('static', filename='images/logo-test-2-1-10.png') }}" alt="PosturEase Logo">
+        <span class="menu-header-text">PosturEase</span>
+      </div>
+      <button class="menu-close" onclick="toggleMenu()">&times;</button>
+    </div>
+    <nav class="menu-items">
+      <a href="{{ url_for('index') }}" class="menu-item">
+        <i class="fas fa-home"></i>
+        Home
+      </a>
+      <a href="{{ url_for('profile') }}" class="menu-item">
+        <i class="fas fa-user"></i>
+        View Profile
+      </a>
+      <a href="{{ url_for('exercises') }}" class="menu-item">
+        <i class="fas fa-dumbbell"></i>
+        Stretching & Exercises
+      </a>
+      <a href="{{ url_for('posture_history') }}" class="menu-item active">
+        <i class="fas fa-history"></i>
+        Posture History
+      </a>
+      <a href="{{ url_for('settings') }}" class="menu-item">
+        <i class="fas fa-cog"></i>
+        Settings
+      </a>
+      <a href="#" class="menu-item logout-item" onclick="logout(); return false;">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </a>
+    </nav>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <script>
+    // Initialize progress bar widths based on data attributes
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.notification-card').forEach(card => {
+        const fill = card.querySelector('.progress-fill');
+        if (!fill) return;
+        const confidenceAttr = card.dataset.confidence;
+        const confidencePct = parseFloat(confidenceAttr || '0');
+        if (!isNaN(confidencePct)) {
+          fill.style.width = `${confidencePct}%`;
+        }
+      });
+    });
+    const exercisesUrl = "{{ url_for('exercises') }}";
+    
+    // Function to get personalized exercises based on posture problems
+    function getPersonalizedExercises(durationMinutes, badTimeSeconds, goodTimeSeconds) {
+      const exerciseDatabase = {
+        '1': { name: 'Child\'s Pose', image: 'exer-1.png', focus: ['relaxation', 'spine_decompression', 'stress_relief'] },
+        '2': { name: 'Forward Fold', image: 'exer-2.png', focus: ['spine_decompression', 'hamstring_stretch', 'posture_correction'] },
+        '3': { name: 'Cat-Cow', image: 'exer-3.png', focus: ['spine_mobility', 'core_strength', 'posture_awareness'] },
+        '4': { name: 'Standing Cat-Cow', image: 'exer-4.png', focus: ['spine_mobility', 'posture_correction', 'office_friendly'] },
+        '5': { name: 'Chest Opener', image: 'exer-5.png', focus: ['chest_stretch', 'shoulder_correction', 'forward_head_posture'] },
+        '6': { name: 'High Plank', image: 'exer-6.png', focus: ['core_strength', 'posture_stability', 'full_body'] },
+        '7': { name: 'Side Plank', image: 'exer-7.png', focus: ['core_strength', 'lateral_stability', 'spine_alignment'] },
+        '8': { name: 'Downward-Facing Dog', image: 'exer-8.png', focus: ['spine_decompression', 'hamstring_stretch', 'full_body'] },
+        '9': { name: 'Pigeon Pose', image: 'exer-9.png', focus: ['hip_flexibility', 'lower_back_relief', 'posture_correction'] },
+        '10': { name: 'Quadruped Thoracic Rotation', image: 'exer-10.png', focus: ['thoracic_mobility', 'spine_rotation', 'posture_correction'] },
+        '11': { name: 'Glute Bridge', image: 'exer-11.png', focus: ['glute_activation', 'lower_back_strength', 'posture_support'] },
+        '12': { name: 'Isometric Pull Ups', image: 'exer-12.png', focus: ['upper_back_strength', 'shoulder_stability', 'posture_correction'] }
+      };
+
+      let recommendedExercises = [];
+      const badTimePercentage = (badTimeSeconds / (badTimeSeconds + goodTimeSeconds)) * 100;
+
+      // Low Risk (0-5 minutes) - Gentle, preventive exercises
+      if (durationMinutes <= 5) {
+        recommendedExercises = [
+          { id: '1', name: 'Child\'s Pose', image: 'exer-1.png' },
+          { id: '2', name: 'Forward Fold', image: 'exer-2.png' },
+          { id: '5', name: 'Chest Opener', image: 'exer-5.png' }
+        ];
+      }
+      // Moderate Risk (5-15 minutes) - Focus on spine mobility and muscle tension
+      else if (durationMinutes <= 15) {
+        recommendedExercises = [
+          { id: '3', name: 'Cat-Cow', image: 'exer-3.png' },
+          { id: '5', name: 'Chest Opener', image: 'exer-5.png' },
+          { id: '8', name: 'Downward-Facing Dog', image: 'exer-8.png' },
+          { id: '1', name: 'Child\'s Pose', image: 'exer-1.png' }
+        ];
+      }
+      // High Risk (15-30 minutes) - Address structural stress and forward head posture
+      else if (durationMinutes <= 30) {
+        recommendedExercises = [
+          { id: '5', name: 'Chest Opener', image: 'exer-5.png' },
+          { id: '10', name: 'Quadruped Thoracic Rotation', image: 'exer-10.png' },
+          { id: '3', name: 'Cat-Cow', image: 'exer-3.png' },
+          { id: '6', name: 'High Plank', image: 'exer-6.png' },
+          { id: '1', name: 'Child\'s Pose', image: 'exer-1.png' }
+        ];
+      }
+      // Severe Risk (30-60 minutes) - Comprehensive correction and strengthening
+      else if (durationMinutes <= 60) {
+        recommendedExercises = [
+          { id: '5', name: 'Chest Opener', image: 'exer-5.png' },
+          { id: '10', name: 'Quadruped Thoracic Rotation', image: 'exer-10.png' },
+          { id: '12', name: 'Isometric Pull Ups', image: 'exer-12.png' },
+          { id: '6', name: 'High Plank', image: 'exer-6.png' },
+          { id: '7', name: 'Side Plank', image: 'exer-7.png' },
+          { id: '8', name: 'Downward-Facing Dog', image: 'exer-8.png' }
+        ];
+      }
+      // Critical Risk (60+ minutes) - Intensive rehabilitation and prevention
+      else {
+        recommendedExercises = [
+          { id: '5', name: 'Chest Opener', image: 'exer-5.png' },
+          { id: '10', name: 'Quadruped Thoracic Rotation', image: 'exer-10.png' },
+          { id: '12', name: 'Isometric Pull Ups', image: 'exer-12.png' },
+          { id: '6', name: 'High Plank', image: 'exer-6.png' },
+          { id: '11', name: 'Glute Bridge', image: 'exer-11.png' },
+          { id: '9', name: 'Pigeon Pose', image: 'exer-9.png' },
+          { id: '8', name: 'Downward-Facing Dog', image: 'exer-8.png' }
+        ];
+      }
+
+      // Adjust recommendations based on specific posture patterns
+      if (badTimePercentage > 80) {
+        // Very poor posture - add more corrective exercises
+        recommendedExercises.unshift(
+          { id: '5', name: 'Chest Opener', image: 'exer-5.png' },
+          { id: '10', name: 'Quadruped Thoracic Rotation', image: 'exer-10.png' }
+        );
+      }
+
+      // Limit to 4 exercises for better UI
+      return recommendedExercises.slice(0, 4);
+    }
+
+    // Function to set up exercise card click listeners
+    function setupExerciseCardListeners() {
+      // Use event delegation to handle clicks on dynamically created exercise cards
+      document.addEventListener('click', function(event) {
+        const exerciseCard = event.target.closest('.exercise-card');
+        if (exerciseCard && exerciseCard.dataset.exerciseId) {
+          const exerciseId = exerciseCard.dataset.exerciseId;
+          const exerciseName = exerciseCard.dataset.exerciseName;
+          openSpecificExercise(exerciseId, exerciseName);
+        }
+      });
+    }
+
+    // Function to open specific exercise on exercises page
+    function openSpecificExercise(exerciseId, exerciseName) {
+      console.log('Opening exercise:', exerciseId, exerciseName);
+      
+      // Close the current modal first
+      closeNotificationDetails();
+      
+      // Store the exercise to open in localStorage for the exercises page to use
+      const exerciseData = {
+        id: exerciseId,
+        name: exerciseName,
+        timestamp: Date.now(),
+        autoStart: true // Flag to auto-start the timer
+      };
+      
+      localStorage.setItem('openExercise', JSON.stringify(exerciseData));
+      console.log('Stored exercise data:', exerciseData);
+      
+      // Navigate to exercises page
+      window.location.href = exercisesUrl;
+    }
+
+    function showNotificationDetails(cardEl) {
+      const modal = document.getElementById('notificationModal');
+      const titleElement = document.getElementById('modalTitle');
+      const descriptionElement = document.getElementById('modalDescription');
+      // Prefer on-the-fly analytics from the clicked card's data attributes
+      const postureType = (cardEl?.dataset?.postureType || '').toLowerCase();
+      const durationMinutes = parseFloat(cardEl?.dataset?.durationMinutes || '0');
+      const confidencePct = parseFloat(cardEl?.dataset?.confidence || '0');
+
+      let title = 'Posture Analysis';
+      let descriptionHtml = '';
+
+      const isGoodPosture = postureType.includes('good');
+      const durationSeconds = durationMinutes * 60; // Convert to seconds
+      
+      // Get actual good/bad time from data attributes if available
+      const goodTimeAttr = cardEl?.dataset?.goodTime;
+      const badTimeAttr = cardEl?.dataset?.badTime;
+      
+      let goodTimeSeconds, badTimeSeconds;
+      if (goodTimeAttr && badTimeAttr) {
+        // Use actual tracked times from database
+        goodTimeSeconds = parseFloat(goodTimeAttr) || 0;
+        badTimeSeconds = parseFloat(badTimeAttr) || 0;
+      } else {
+        // Fallback to calculated times
+        goodTimeSeconds = isNaN(durationSeconds) ? 0 : (durationSeconds * confidencePct / 100);
+        badTimeSeconds = isNaN(durationSeconds) ? 0 : (durationSeconds * (1 - confidencePct / 100));
+      }
+      
+      // Detailed medical-style block for ALL sessions (good or bad)
+      let riskLevel = '';
+      let medicalWarnings = '';
+      let musculoskeletalRisks = '';
+
+      if (durationMinutes <= 5) {
+        riskLevel = 'Low Risk';
+        medicalWarnings = isGoodPosture
+          ? 'Healthy posture maintenance with minimal exposure.'
+          : 'Minimal immediate risk. Brief poor posture exposure.';
+      } else if (durationMinutes <= 15) {
+        riskLevel = 'Moderate Risk';
+        medicalWarnings = isGoodPosture
+          ? 'Good overall posture; brief periods may still cause mild tension. Maintain breaks and mobility.'
+          : '⚠️ <strong>Muscle Fatigue Risk:</strong> Prolonged poor posture can cause muscle imbalances and trigger points.';
+        musculoskeletalRisks = isGoodPosture ? '' : '<br><br><strong>Potential Conditions:</strong><br>• Muscle tension headaches<br>• Cervical strain<br>• Upper trapezius tightness';
+      } else if (durationMinutes <= 30) {
+        riskLevel = 'High Risk';
+        medicalWarnings = isGoodPosture
+          ? 'Longer session duration can still induce fatigue. Keep up posture breaks and light mobility.'
+          : '🚨 <strong>Structural Stress:</strong> Extended poor posture places excessive load on cervical spine and supporting muscles.';
+        musculoskeletalRisks = isGoodPosture ? '' : '<br><br><strong>Potential Conditions:</strong><br>• Forward Head Posture Syndrome<br>• Cervical disc degeneration<br>• Thoracic kyphosis<br>• Shoulder impingement syndrome<br>• Tension neck syndrome';
+      } else if (durationMinutes <= 60) {
+        riskLevel = 'Severe Risk';
+        medicalWarnings = isGoodPosture
+          ? 'Extended session. Even with good posture, sustained static positions can increase strain—add movement breaks.'
+          : '🔴 <strong>Chronic Postural Dysfunction:</strong> Prolonged poor posture can lead to permanent structural changes.';
+        musculoskeletalRisks = isGoodPosture ? '' : '<br><br><strong>Potential Conditions:</strong><br>• Chronic neck pain<br>• Cervical spondylosis<br>• Thoracic outlet syndrome<br>• Temporomandibular joint (TMJ) dysfunction<br>• Chronic tension headaches<br>• Upper cross syndrome';
+      } else {
+        riskLevel = 'Critical Risk';
+        medicalWarnings = isGoodPosture
+          ? 'Very long session. Maintain frequent micro-breaks and mobility to prevent overuse even with good posture.'
+          : '🆘 <strong>Severe Musculoskeletal Risk:</strong> Extended poor posture significantly increases risk of chronic conditions.';
+        musculoskeletalRisks = isGoodPosture ? '' : '<br><br><strong>Potential Conditions:</strong><br>• Chronic cervical spine degeneration<br>• Disc herniation risk<br>• Permanent postural deformities<br>• Chronic pain syndromes<br>• Reduced quality of life<br>• Increased healthcare costs';
+      }
+
+      // Base summary line (consistent across sessions)
+      let baseSummary = isGoodPosture
+        ? `Great job maintaining good posture! You had <strong>good posture for ${goodTimeSeconds.toFixed(0)} seconds</strong> out of ${durationSeconds.toFixed(0)} total seconds.`
+        : `Posture Analysis<br>You had <strong>good posture for ${goodTimeSeconds.toFixed(0)} seconds</strong> out of ${durationSeconds.toFixed(0)} total seconds.`;
+
+      if (!isNaN(confidencePct) && confidencePct > 0) {
+        baseSummary += ` <br><br><strong>Confidence:</strong> ${confidencePct.toFixed(1)}%`;
+      }
+      if (badTimeSeconds > 0) {
+        baseSummary += ` <br><br><strong>Poor posture time:</strong> ${badTimeSeconds.toFixed(0)} seconds.`;
+      }
+
+      // Show concise summary only (remove medical block)
+      descriptionHtml = baseSummary;
+
+      // Always include Recommendations (maintenance if good, corrective if bad)
+      const recommendedExercises = getPersonalizedExercises(durationMinutes, badTimeSeconds, goodTimeSeconds);
+      descriptionHtml += ` <br><br><div class="exercise-recommendations">
+        <strong>Recommended Exercises:</strong>
+        <div class="exercise-grid">
+          ${recommendedExercises.map(exercise => `
+            <div class="exercise-card" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">
+              <img src="/static/images/${exercise.image}" alt="${exercise.name}">
+              <span>${exercise.name}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+
+      // Fallback to server-provided content if available and richer
+      // Note: legacy calls passed an index; we cannot infer it reliably here, so we rely on analytics.
+      titleElement.textContent = title;
+      descriptionElement.innerHTML = descriptionHtml;
+      modal.classList.add('active');
+      
+      // Add event delegation for exercise cards
+      setupExerciseCardListeners();
+    }
+
+    function closeNotificationDetails() {
+      const modal = document.getElementById('notificationModal');
+      modal.classList.remove('active');
+    }
+
+    function toggleMenu() {
+      const sideMenu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('overlay');
+      sideMenu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const dateRange = document.getElementById('dateRange');
+      const postureStatus = document.getElementById('postureStatus');
+      const sortBy = document.getElementById('sortBy');
+
+      // Add event listeners for filtering
+      [dateRange, postureStatus, sortBy].forEach(select => {
+        if (select) {
+          select.addEventListener('change', function() {
+            // In a real implementation, you would send these filters to the server
+            // and reload the page with filtered data
+            console.log('Filter changed:', {
+              dateRange: dateRange.value,
+              postureStatus: postureStatus.value,
+              sortBy: sortBy.value
+            });
+          });
+                 }
+       });
+     });
+
+    function logout(event) {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+
+    // Check authentication and load user data
+    window.onload = function() {
+      if (localStorage.getItem('isLoggedIn') !== 'true') {
+        window.location.href = "{{ url_for('login') }}";
+      }
+      
+      // Load user data and update profile section
+      loadUserProfile();
+      
+      // Fix posture status for existing records
+      fixPostureStatus();
+      
+      // Update record count on initial load
+      updateRecordCount();
+      
+      // Defer heavy operations to improve initial load time
+      setTimeout(() => {
+        initializePostureChart();
+      }, 100);
+    }
+
+    function fixPostureStatus() {
+      const notificationCards = document.querySelectorAll('.notification-card');
+      
+      notificationCards.forEach(card => {
+        const goodTime = parseInt(card.dataset.goodTime) || 0;
+        const badTime = parseInt(card.dataset.badTime) || 0;
+        const timeDifference = Math.abs(goodTime - badTime);
+        
+        let newPostureType = 'Poor Posture';
+        let newStatusClass = 'bad-posture';
+        let newIcon = '⚠';
+        
+        if (goodTime > badTime) {
+          if (timeDifference <= 5) {
+            newPostureType = 'Fair Posture';
+            newStatusClass = 'fair-posture';
+            newIcon = '⚖';
+          } else {
+            newPostureType = 'Good Posture';
+            newStatusClass = 'good-posture';
+            newIcon = '✓';
+          }
+        } else if (badTime > goodTime) {
+          if (timeDifference <= 5) {
+            newPostureType = 'Fair Posture';
+            newStatusClass = 'fair-posture';
+            newIcon = '⚖';
+          } else {
+            newPostureType = 'Poor Posture';
+            newStatusClass = 'bad-posture';
+            newIcon = '⚠';
+          }
+        } else {
+          newPostureType = 'Fair Posture';
+          newStatusClass = 'fair-posture';
+          newIcon = '⚖';
+        }
+        
+        // Update the status text and icon
+        const statusText = card.querySelector('.status-text');
+        const statusIcon = card.querySelector('.status-icon');
+        
+        if (statusText) {
+          statusText.textContent = newPostureType;
+          statusText.className = `status-text ${newStatusClass}`;
+        }
+        
+        if (statusIcon) {
+          statusIcon.textContent = newIcon;
+          statusIcon.className = `status-icon ${newStatusClass}`;
+        }
+      });
+    }
+
+    function initializePostureChart() {
+      const ctx = document.getElementById('postureChart');
+      if (!ctx) return;
+
+      // Collect data from the posture history cards in chronological order
+      const cards = Array.from(document.querySelectorAll('.notification-card'));
+      const chartData = {
+        labels: [],
+        goodData: [],
+        fairData: [],
+        poorData: [],
+        correctionsData: []
+      };
+
+      // Limit chart data to last 20 records for better performance
+      const maxRecords = Math.min(cards.length, 20);
+      
+      // Sort cards by timestamp (oldest first for chart) - more efficient than date parsing
+      const sortedCards = cards
+        .map(card => ({
+          card,
+          timestamp: parseFloat(card.dataset.recordedAt || '0')
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .slice(-maxRecords); // Take only the last 20 records
+
+      sortedCards.forEach(({ card }, index) => {
+        const statusText = card.querySelector('.status-text').textContent.toLowerCase();
+        const corrections = parseInt(card.querySelector('.posture-details span:last-child').textContent.match(/\d+/)?.[0] || '0');
+        
+        // Format label (Session number)
+        const sessionNum = index + 1;
+        chartData.labels.push(`S${sessionNum}`);
+        
+        // Assign values based on posture status
+        if (statusText.includes('good')) {
+          chartData.goodData.push(1);
+          chartData.fairData.push(0);
+          chartData.poorData.push(0);
+        } else if (statusText.includes('fair')) {
+          chartData.goodData.push(0);
+          chartData.fairData.push(1);
+          chartData.poorData.push(0);
+        } else {
+          chartData.goodData.push(0);
+          chartData.fairData.push(0);
+          chartData.poorData.push(1);
+        }
+        
+        chartData.correctionsData.push(corrections);
+      });
+
+      // Calculate posture score for each session (0-100 scale) - using limited cards
+      const postureScores = [];
+      sortedCards.forEach(({ card }, index) => {
+        const statusText = card.querySelector('.status-text').textContent.toLowerCase();
+        let score = 0;
+        
+        if (statusText.includes('good')) {
+          score = 100; // Perfect score
+        } else if (statusText.includes('fair')) {
+          score = 60; // Medium score
+        } else {
+          score = 20; // Low score
+        }
+        
+        // Add bonus for corrections (up to 10 points)
+        const corrections = parseInt(card.querySelector('.posture-details span:last-child').textContent.match(/\d+/)?.[0] || '0');
+        const correctionBonus = Math.min(corrections * 2, 10);
+        score += correctionBonus;
+        
+        postureScores.push(Math.min(score, 100));
+      });
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            label: 'Posture Score',
+            data: postureScores,
+            borderColor: '#007AFF',
+            backgroundColor: 'rgba(0, 122, 255, 0.1)',
+            borderWidth: 4,
+            fill: false,
+            tension: 0.2,
+            pointRadius: 8,
+            pointHoverRadius: 10,
+            pointBackgroundColor: '#007AFF',
+            pointBorderColor: '#007AFF',
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const sessionNum = context.label;
+                  const score = context.parsed.y;
+                  const statusText = cards[context.dataIndex]?.querySelector('.status-text').textContent || '';
+                  const corrections = parseInt(cards[context.dataIndex]?.querySelector('.posture-details span:last-child').textContent.match(/\d+/)?.[0] || '0');
+                  
+                  return [
+                    `Session ${sessionNum}`,
+                    `Score: ${score}/100`,
+                    `Status: ${statusText}`,
+                    `Corrections: ${corrections}`
+                  ];
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Posture Score (0-100)',
+                font: {
+                  size: 14,
+                  weight: '600'
+                }
+              },
+              min: 0,
+              max: 100,
+              ticks: {
+                stepSize: 20,
+                callback: function(value) {
+                  return value;
+                }
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)',
+                lineWidth: 1
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Sessions',
+                font: {
+                  size: 14,
+                  weight: '600'
+                }
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)',
+                lineWidth: 1
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function loadUserProfile() {
+      // Get user data from localStorage first
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      
+      // Update profile section with cached data
+      if (currentUser.first_name || currentUser.last_name) {
+        const fullName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim();
+        document.getElementById('user-full-name').textContent = fullName;
+        
+        if (currentUser.profile_picture) {
+          document.getElementById('user-profile-picture').src = currentUser.profile_picture;
+        }
+      }
+      
+      // Fetch latest user data from server
+      fetch('/get-user-data')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const user = data.user;
+            // Update localStorage with latest data
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Update profile information
+            const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+            document.getElementById('user-full-name').textContent = fullName;
+            
+            // Update profile picture if available
+            if (user.profile_picture) {
+              document.getElementById('user-profile-picture').src = user.profile_picture;
+            }
+          } else {
+            console.error('Failed to fetch user data:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+        });
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const sideMenu = document.getElementById('sideMenu');
+      const menuButton = document.querySelector('.menu-button');
+      if (!sideMenu.contains(e.target) && !menuButton.contains(e.target)) {
+        sideMenu.classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+      }
+    });
+
+    // Close modal when clicking outside
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('notificationModal');
+      if (e.target === modal) {
+        closeNotificationDetails();
+      }
+    });
+
+    // Filter functionality
+    document.getElementById('dateRange').addEventListener('change', function() {
+      filterByDateRange(this.value);
+      // Reapply current sorting after filtering
+      const currentSort = document.getElementById('sortBy').value;
+      sortRecords(currentSort);
+    });
+
+    document.getElementById('postureStatus').addEventListener('change', function() {
+      filterPostureStatus(this.value);
+      // Reapply current sorting after filtering
+      const currentSort = document.getElementById('sortBy').value;
+      sortRecords(currentSort);
+    });
+
+    document.getElementById('sortBy').addEventListener('change', function() {
+      sortRecords(this.value);
+    });
+
+    function filterByDateRange(range) {
+      const notificationCards = document.querySelectorAll('.notification-card');
+      const now = new Date();
+      const nowTimestamp = now.getTime() / 1000; // Convert to seconds
+      
+      notificationCards.forEach(card => {
+        const recordTimestamp = parseFloat(card.dataset.recordedAt || '0');
+        const recordDate = new Date(recordTimestamp * 1000); // Convert back to milliseconds
+        let shouldShow = true;
+        
+        if (range === 'custom') {
+          // For custom range, show all records (user would need to implement custom date picker)
+          shouldShow = true;
+        } else {
+          const days = parseInt(range);
+          const cutoffDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+          shouldShow = recordDate >= cutoffDate;
+        }
+        
+        card.style.display = shouldShow ? 'block' : 'none';
+      });
+      
+      // Update record count after filtering
+      updateRecordCount();
+    }
+
+    function filterPostureStatus(status) {
+      const notificationCards = document.querySelectorAll('.notification-card');
+      
+      notificationCards.forEach(card => {
+        const statusText = card.querySelector('.status-text').textContent.toLowerCase();
+        const isGoodPosture = statusText.includes('good');
+        const isFairPosture = statusText.includes('fair');
+        
+        switch(status) {
+          case 'good':
+            card.style.display = isGoodPosture ? 'block' : 'none';
+            break;
+          case 'bad':
+            card.style.display = (!isGoodPosture && !isFairPosture) ? 'block' : 'none';
+            break;
+          case 'mixed':
+            card.style.display = isFairPosture ? 'block' : 'none';
+            break;
+          default: // 'all'
+            card.style.display = 'block';
+        }
+      });
+      
+      // Update record count after filtering
+      updateRecordCount();
+    }
+
+    function sortRecords(sortBy) {
+      const container = document.querySelector('.notification-list');
+      const cards = Array.from(document.querySelectorAll('.notification-card'));
+      
+      // Only sort visible cards (not hidden by filters)
+      const visibleCards = cards.filter(card => card.style.display !== 'none');
+      
+      visibleCards.sort((a, b) => {
+        switch(sortBy) {
+          case 'newest':
+            // Sort by timestamp - newest first (descending order)
+            const timestampA = parseFloat(a.dataset.recordedAt || '0');
+            const timestampB = parseFloat(b.dataset.recordedAt || '0');
+            return timestampB - timestampA;
+          case 'oldest':
+            // Sort by timestamp - oldest first (ascending order)
+            const timestampAOld = parseFloat(a.dataset.recordedAt || '0');
+            const timestampBOld = parseFloat(b.dataset.recordedAt || '0');
+            return timestampAOld - timestampBOld;
+          case 'duration':
+            // Sort by duration - longest first (descending order)
+            const durationA = parseFloat(a.dataset.durationMinutes || '0');
+            const durationB = parseFloat(b.dataset.durationMinutes || '0');
+            return durationB - durationA;
+          default:
+            return 0;
+        }
+      });
+      
+      // Re-append sorted visible cards, maintaining hidden cards in their original positions
+      visibleCards.forEach(card => container.appendChild(card));
+      
+      // Update record count after sorting
+      updateRecordCount();
+    }
+
+    // Function to update the record count display
+    function updateRecordCount() {
+      const notificationCards = document.querySelectorAll('.notification-card');
+      const visibleCards = Array.from(notificationCards).filter(card => card.style.display !== 'none');
+      const totalRecords = notificationCards.length;
+      const visibleCount = visibleCards.length;
+      
+      const recordsCountElement = document.getElementById('records-count');
+      if (recordsCountElement) {
+        recordsCountElement.textContent = `Showing ${visibleCount} of ${totalRecords} total sessions`;
+      }
+    }
+
+    // Function to show success modal
+    function showSuccessModal(message) {
+      alert(message); // Simple alert for now, can be enhanced with a proper modal
+    }
+
+    // Function to show error modal
+    function showErrorModal(message) {
+      alert(message); // Simple alert for now, can be enhanced with a proper modal
+    }
+
+    // Simple delete functionality
+    function deleteRecord(recordId) {
+      if (confirm('Are you sure you want to delete this posture record? This action cannot be undone.')) {
+        fetch('/delete-posture-record', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ record_id: recordId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Remove the card from the DOM
+            const card = document.querySelector(`[data-record-id="${recordId}"]`);
+            if (card) {
+              card.remove();
+            }
+            // Update record count after deletion
+            updateRecordCount();
+            // Show success message
+            showSuccessModal('Record deleted successfully!');
+            // Reload the page to update statistics
+            location.reload();
+          } else {
+            showErrorModal('Error deleting record: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showErrorModal('Error deleting record. Please try again.');
+        });
+      }
+    }
+
+  </script>
+</body>
+</html> 
